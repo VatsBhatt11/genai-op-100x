@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CANDIDATE
+  COMPANY
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum MessageChannel {
+  EMAIL
+  WHATSAPP
+  SMS
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum TemplateType {
+  OUTREACH
+  REJECTION
+  INTERVIEW
+  CONGRATS
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  role          UserRole
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  candidateProfile CandidateProfile?
+  jobs             Job[]
+  applications     Application[]
+  messageTemplates MessageTemplate[]
+  messageLogs      MessageLog[]
+
+  @@map("users")
+}
+
+model CandidateProfile {
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  fullName         String?
+  parsedProfile    Json?
+  rawResumeText    String? @db.Text
+  resumeText       String? @db.Text // Cleaned text for FTS
+  resumeUrl        String?
+  completionScore  Float?
+  skills           String[]
+  experience       String?
+  location         String?
+  employmentType   String?
+  searchVector     String? @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@map("candidate_profiles")
+}
+
+model Job {
+  id             String   @id @default(cuid())
+  companyId      String
+  title          String
+  description    String   @db.Text
+  location       String?
+  experience     String?
+  employmentType String?
+  isRemote       Boolean  @default(false)
+  skills         String[]
+  searchVector   String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company      User          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@map("jobs")
+}
+
+model Application {
+  id                  String            @id @default(cuid())
+  jobId               String
+  candidateId         String
+  matchScore          Float?
+  feedbackSuggestions String?           @db.Text
+  status              ApplicationStatus @default(PENDING)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  job         Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  messageLogs MessageLog[]
+
+  @@unique([jobId, candidateId])
+  @@map("applications")
+}
+
+model MessageTemplate {
+  id        String       @id @default(cuid())
+  companyId String
+  type      TemplateType
+  content   String       @db.Text
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  company User @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("message_templates")
+}
+
+model MessageLog {
+  id            String        @id @default(cuid())
+  applicationId String
+  senderId      String
+  channel       MessageChannel
+  content       String        @db.Text
+  status        MessageStatus @default(PENDING)
+  sentAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("message_logs")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
