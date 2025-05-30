@@ -1,0 +1,126 @@
+.jobs-container {
+  min-height: 100vh;
+  padding: var(--spacing-lg);
+  background: var(--bg-light);
+}
+
+.jobs-header {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.jobs-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.jobs-filters {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
+}
+
+.jobs-filter {
+  flex: 1;
+  min-width: 200px;
+}
+
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.job-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.job-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.job-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.job-company {
+  color: var(--text-secondary);
+  font-size: var(--fs-base);
+  margin-bottom: var(--spacing-sm);
+}
+
+.job-location {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.job-salary {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  color: var(--color-primary);
+}
+
+.job-description {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+  margin-bottom: var(--spacing-md);
+}
+
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.job-tag {
+  background: var(--bg-light);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+}
+
+.job-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .jobs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jobs-filters {
+    flex-direction: column;
+  }
+
+  .job-card-header {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
