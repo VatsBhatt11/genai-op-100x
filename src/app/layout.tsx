@@ -1,14 +1,17 @@
 import type React from "react"
 import type { Metadata } from "next"
-import "../styles/globals.css"
+import { Inter } from "next/font/google"
+import "@/src/styles/globals.css"
+import { Toaster } from "../components/ui/toaster"
+import { NotificationBell } from "../components/NotificationBell"
+import { NextAuthProvider } from "../components/providers/next-auth-provider"
+import { UploadThingProvider } from "../components/providers/uploadthing-provider"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "JobMatch AI - Find Your Perfect Career Match",
-  description:
-    "Connect talented professionals with their dream jobs using advanced AI matching algorithms. Get personalized recommendations, skill assessments, and career insights that matter.",
-  keywords: ["jobs", "career", "AI", "matching", "recruitment", "hiring"],
-  authors: [{ name: "JobMatch AI Team" }],
-  viewport: "width=device-width, initial-scale=1",
+  title: "JobMatch AI",
+  description: "AI-powered job matching platform",
 }
 
 export default function RootLayout({
@@ -18,14 +21,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-      <body>
-        <div id="root">{children}</div>
+      <body className={inter.className}>
+        <nav className="border-b bg-white">
+          <div className="max-w-7xl mx-auto px:4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-bold">JobMatch AI</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <NotificationBell />
+              </div>
+            </div>
+          </div>
+        </nav>
+        <NextAuthProvider>
+          <UploadThingProvider>
+            {children}
+            <Toaster />
+          </UploadThingProvider>
+        </NextAuthProvider>
       </body>
     </html>
   )

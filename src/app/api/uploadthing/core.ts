@@ -1,3 +1,3 @@
-import { ourFileRouter } from "@/lib/uploadthing"
+import { ourFileRouter } from "@/src/lib/uploadthing";
 
-export { ourFileRouter }
+export { ourFileRouter };

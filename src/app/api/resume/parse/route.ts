@@ -1,56 +1,84 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { parseResume, calculateCompletionScore, extractExperienceLevel } from "@/lib/resume-parser"
-import { z } from "zod"
+import { NextResponse } from "next/server";
+import { prisma } from "@/src/lib/prisma";
+import { ResumeParser } from "@/src/lib/resumeParser";
+import { getServerSession } from "next-auth/next";
 
-const parseSchema = z.object({
-  userId: z.string(),
-  fileUrl: z.string().url(),
-})
-
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const session = await getServerSession();
+    if (!session?.user?.email) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json()
-    const { userId, fileUrl } = parseSchema.parse(body)
-
-    // Verify user owns this profile or is admin
-    if (session.user.id !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    const { resumeUrl } = await req.json();
+    if (!resumeUrl) {
+      return NextResponse.json(
+        { message: "Resume URL is required" },
+        { status: 400 }
+      );
     }
 
-    // Parse the resume
-    const { parsedProfile, rawText, cleanedText } = await parseResume(fileUrl)
-    const completionScore = calculateCompletionScore(parsedProfile)
-    const experienceLevel = extractExperienceLevel(parsedProfile)
+    // Get user and their candidate profile
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { candidateProfile: true },
+    });
 
-    // Update candidate profile with enhanced data
-    const candidateProfile = await prisma.candidateProfile.update({
-      where: { userId },
+    if (!user || !user.candidateProfile) {
+      return NextResponse.json(
+        { message: "User or candidate profile not found" },
+        { status: 404 }
+      );
+    }
+
+    // Parse resume
+    const parser = new ResumeParser();
+    const parsedResume = await parser.parseResumeFromUrl(resumeUrl);
+
+    // Update candidate profile with parsed data
+    await prisma.candidateProfile.update({
+      where: { userId: user.id },
       data: {
-        fullName: parsedProfile.name,
-        parsedProfile,
-        rawResumeText: rawText,
-        resumeText: cleanedText, // For FTS
-        resumeUrl: fileUrl,
-        completionScore,
-        skills: parsedProfile.skills,
-        experience: experienceLevel,
-        // Try to extract location from parsed profile or use existing
-        location: parsedProfile.name, // This should be improved to extract actual location
+        fullName: parsedResume.name,
+        parsedProfile: parsedResume,
+        rawResumeText: parsedResume.text,
+        resumeText: parsedResume.text,
+        resumeUrl: resumeUrl,
+        skills: parsedResume.skills,
+        experience: parsedResume.experience,
+        education: parsedResume.education,
+        workHistory: parsedResume.workHistory,
+        certifications: parsedResume.certifications,
+        languages: parsedResume.languages,
+        completionScore: calculateCompletionScore(parsedResume),
       },
-    })
+    });
 
-    return NextResponse.json(candidateProfile)
+    return NextResponse.json(
+      { message: "Resume parsed successfully" },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Parse error:", error)
-    return NextResponse.json({ error: "Failed to parse resume" }, { status: 500 })
+    console.error("Resume parsing error:", error);
+    return NextResponse.json(
+      { message: "Failed to parse resume" },
+      { status: 500 }
+    );
   }
+}
+
+function calculateCompletionScore(parsedResume: any): number {
+  let score = 0;
+  const totalFields = 8; // Total number of fields we check
+
+  if (parsedResume.name) score++;
+  if (parsedResume.skills?.length > 0) score++;
+  if (parsedResume.experience) score++;
+  if (parsedResume.education) score++;
+  if (parsedResume.workHistory?.length > 0) score++;
+  if (parsedResume.certifications?.length > 0) score++;
+  if (parsedResume.languages?.length > 0) score++;
+  if (parsedResume.text) score++;
+
+  return (score / totalFields) * 100;
 }

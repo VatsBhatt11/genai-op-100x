@@ -23,6 +23,7 @@ enum MessageChannel {
   EMAIL
   WHATSAPP
   SMS
+  PLATFORM
 }
 
 enum MessageStatus {
@@ -30,6 +31,7 @@ enum MessageStatus {
   SENT
   DELIVERED
   FAILED
+  READ
 }
 
 enum TemplateType {
@@ -37,6 +39,13 @@ enum TemplateType {
   REJECTION
   INTERVIEW
   CONGRATS
+}
+
+enum NotificationType {
+  MESSAGE
+  APPLICATION_UPDATE
+  JOB_MATCH
+  INTERVIEW_INVITE
 }
 
 model Account {
@@ -76,38 +85,52 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
-  candidateProfile CandidateProfile?
-  jobs             Job[]
-  applications     Application[]
-  messageTemplates MessageTemplate[]
-  messageLogs      MessageLog[]
+  accounts              Account[]
+  sessions              Session[]
+  candidateProfile      CandidateProfile?
+  jobs                  Job[]
+  applications          Application[]
+  messageTemplates      MessageTemplate[]
+  messageLogs           MessageLog[]
+  sentNotifications     Notification[]    @relation("NotificationSender")
+  receivedNotifications Notification[]    @relation("NotificationReceiver")
 
-  @@map("users")
+  @@index([email])
+  @@index([role])
 }
 
 model CandidateProfile {
-  id               String  @id @default(cuid())
-  userId           String  @unique
-  fullName         String?
-  parsedProfile    Json?
-  rawResumeText    String? @db.Text
-  resumeText       String? @db.Text // Cleaned text for FTS
-  resumeUrl        String?
-  completionScore  Float?
-  skills           String[]
-  experience       String?
-  location         String?
-  employmentType   String?
-  searchVector     String? @db.Text
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  fullName        String?
+  parsedProfile   Json?
+  rawResumeText   String?  @db.Text
+  resumeText      String?  @db.Text
+  resumeUrl       String?
+  completionScore Float?
+  skills          String[]
+  experience      String?
+  location        String?
+  employmentType  String?
+  searchVector    String?  @db.Text
+  education       Json? // Store education details as JSON
+  workHistory     Json? // Store work history as JSON
+  certifications  String[] // Store certifications
+  languages       String[] // Store languages known
+  phoneNumber     String? // Store contact number
+  linkedinUrl     String? // Store LinkedIn profile URL
+  githubUrl       String? // Store GitHub profile URL
+  portfolioUrl    String? // Store portfolio URL
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   applications Application[]
 
-  @@map("candidate_profiles")
+  @@index([skills])
+  @@index([experience])
+  @@index([location])
+  @@index([employmentType])
 }
 
 model Job {
@@ -127,13 +150,17 @@ model Job {
   company      User          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   applications Application[]
 
-  @@map("jobs")
+  @@index([companyId])
+  @@index([skills])
+  @@index([location])
+  @@index([createdAt])
 }
 
 model Application {
   id                  String            @id @default(cuid())
   jobId               String
   candidateId         String
+  userId              String
   matchScore          Float?
   feedbackSuggestions String?           @db.Text
   status              ApplicationStatus @default(PENDING)
@@ -142,10 +169,14 @@ model Application {
 
   job         Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
   candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   messageLogs MessageLog[]
 
   @@unique([jobId, candidateId])
-  @@map("applications")
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([userId])
+  @@index([status])
 }
 
 model MessageTemplate {
@@ -158,24 +189,48 @@ model MessageTemplate {
 
   company User @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  @@map("message_templates")
+  @@index([companyId])
+  @@index([type])
 }
 
 model MessageLog {
-  id            String        @id @default(cuid())
-  applicationId String
+  id            String         @id @default(cuid())
+  applicationId String?
   senderId      String
+  receiverId    String?
   channel       MessageChannel
-  content       String        @db.Text
-  status        MessageStatus @default(PENDING)
+  content       String         @db.Text
+  status        MessageStatus  @default(PENDING)
   sentAt        DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  sender      User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
-  @@map("message_logs")
+  @@index([senderId])
+  @@index([applicationId])
+  @@index([status])
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  senderId   String
+  receiverId String
+  type       NotificationType
+  title      String
+  content    String           @db.Text
+  isRead     Boolean          @default(false)
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  sender   User @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("NotificationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 model VerificationToken {

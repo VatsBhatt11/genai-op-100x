@@ -1,58 +1,65 @@
-import { type NextRequest, NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
-import { prisma } from "@/lib/prisma"
-import { z } from "zod"
+import { NextResponse } from "next/server";
+import { hash } from "bcryptjs";
+import { prisma } from "@/src/lib/prisma";
+import { UserRole } from "@prisma/client";
 
-const signupSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  role: z.enum(["CANDIDATE", "COMPANY"]),
-})
-
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json()
-    const { email, password, role } = signupSchema.parse(body)
+    const { email, password, role } = await req.json();
+
+    // Validate input
+    if (!email || !password || !role) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
-    })
+    });
 
     if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 })
+      return NextResponse.json(
+        { message: "User already exists" },
+        { status: 400 }
+      );
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await hash(password, 12);
 
     // Create user
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        role,
+        role: role as UserRole,
       },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
-    })
+    });
 
-    // Create candidate profile if role is CANDIDATE
-    if (role === "CANDIDATE") {
+    // If user is a candidate, create an empty candidate profile
+    if (role === UserRole.CANDIDATE) {
       await prisma.candidateProfile.create({
         data: {
           userId: user.id,
+          skills: [],
+          certifications: [],
+          languages: [],
         },
-      })
+      });
     }
 
-    return NextResponse.json(user, { status: 201 })
+    return NextResponse.json(
+      { message: "User created successfully" },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("Signup error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Signup error:", error);
+    return NextResponse.json(
+      { message: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

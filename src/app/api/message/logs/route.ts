@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/lib/auth";
+import { prisma } from "@/src/lib/prisma";
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -10,14 +11,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // UploadThing handles the actual file upload
-    // This endpoint returns the upload URL for the client
-    return NextResponse.json({
-      message: "Use UploadThing client for file upload",
-      uploadEndpoint: "/api/uploadthing",
+    const messageLogs = await prisma.messageLog.findMany({
+      where: { senderId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      take: 50,
     });
+
+    return NextResponse.json(messageLogs);
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("Get message logs error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
