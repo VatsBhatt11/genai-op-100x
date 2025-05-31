@@ -1,48 +1,55 @@
-import { NextAuthOptions } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
 import { prisma } from "./prisma";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login",
-  },
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      name: "Sign in",
+      name: "credentials",
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "example@example.com",
-        },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
-          return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password required");
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
+          where: { email: credentials.email },
         });
 
         if (!user || !user.password) {
-          return null;
+          throw new Error("No user found");
         }
 
-        const isPasswordValid = await compare(
+        const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
 
         if (!isPasswordValid) {
-          return null;
+          throw new Error("Invalid password");
+        }
+
+        if (user.role === "COMPANY") {
+          // Create company profile if it doesn't exist
+          const existingProfile = await prisma.companyProfile.findUnique({
+            where: { userId: user.id },
+          });
+
+          if (!existingProfile) {
+            await prisma.companyProfile.create({
+              data: {
+                userId: user.id,
+                name: user.email.split("@")[0],
+                description: "Welcome to our platform!",
+              },
+            });
+          }
         }
 
         return {
@@ -53,26 +60,31 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session: ({ session, token }) => {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          role: token.role,
-        },
-      };
+    async session({ session, token }) {
+      if (token?.sub) {
+        session.user.id = token.sub;
+      }
+      if (token?.role) {
+        session.user.role = token.role as string;
+      }
+      return session;
     },
-    jwt: ({ token, user }) => {
+    async jwt({ token, user }) {
       if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: user.role,
-        };
+        token.role = user.role;
       }
       return token;
     },
   },
+  pages: {
+    signIn: "/login",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 };
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

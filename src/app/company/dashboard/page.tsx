@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { CompanySearch } from "@/components/CompanySearch"
 
 export default function CompanyDashboardPage() {
   const router = useRouter()
@@ -139,6 +140,8 @@ export default function CompanyDashboardPage() {
             </div>
           </div>
         </div>
+
+        <CompanySearch />
       </div>
 
       <style jsx>{`

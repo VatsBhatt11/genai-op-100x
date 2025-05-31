@@ -51,6 +51,10 @@ export class ResumeParser {
   private reader: LlamaParseReader;
 
   constructor() {
+    if (!process.env.LLAMA_CLOUD_API_KEY) {
+      throw new Error("LLAMA_CLOUD_API_KEY is required");
+    }
+
     this.reader = new LlamaParseReader({
       apiKey: process.env.LLAMA_CLOUD_API_KEY,
       resultType: "text",
@@ -221,9 +225,17 @@ export class ResumeParser {
   async parseResumeFromUrl(url: string): Promise<ParsedResume> {
     let tempFilePath: string | null = null;
     try {
-      // Download the PDF
-      const response = await axios.get(url, { responseType: "arraybuffer" });
-      const pdfBuffer = Buffer.from(response.data);
+      let pdfBuffer: Buffer;
+
+      // Check if the URL is a file path or HTTP(S) URL
+      if (url.startsWith("http://") || url.startsWith("https://")) {
+        // Download the PDF from URL
+        const response = await axios.get(url, { responseType: "arraybuffer" });
+        pdfBuffer = Buffer.from(response.data);
+      } else {
+        // Read the file directly
+        pdfBuffer = fs.readFileSync(url);
+      }
 
       // Create a temporary file
       tempFilePath = path.join(os.tmpdir(), `resume-${Date.now()}.pdf`);

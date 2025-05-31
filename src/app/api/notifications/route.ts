@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/src/lib/auth";
-import { prisma } from "@/src/lib/prisma";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,5 +59,33 @@ export async function GET(request: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const body = await req.json();
+    const { receiverId, type, title, content, outreachId } = body;
+
+    const notification = await prisma.notification.create({
+      data: {
+        senderId: session.user.id,
+        receiverId,
+        type,
+        title,
+        content,
+        outreachId,
+      },
+    });
+
+    return NextResponse.json(notification);
+  } catch (error) {
+    console.error("[NOTIFICATIONS_POST]", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 }

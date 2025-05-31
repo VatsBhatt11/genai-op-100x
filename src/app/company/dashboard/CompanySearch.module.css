@@ -1,0 +1,639 @@
+.searchContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.searchHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.searchTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchTitle::before {
+  content: "";
+  width: 4px;
+  height: 24px;
+  background: #4caf50;
+  border-radius: 2px;
+}
+
+.searchForm {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.searchInputWrapper:focus-within {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: color 0.3s ease;
+}
+
+.searchInputWrapper:focus-within .searchIcon {
+  color: #4caf50;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 3rem;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  font-size: 1rem;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+.clearButton {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.searchButton {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #4caf50, #43a047);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(76, 175, 80, 0.2);
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -1px rgba(76, 175, 80, 0.3);
+}
+
+.searchButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.outreachContainer {
+  margin-top: 2rem;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.outreachCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.outreachCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.outreachCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #4caf50;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.outreachCard:hover::before {
+  opacity: 1;
+}
+
+.outreachHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.outreachTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.outreachStatus {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.statusPending {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.statusCompleted {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.outreachDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.detailIcon {
+  color: #4caf50;
+  font-size: 1.1rem;
+}
+
+.outreachActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.outreachButton {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.primaryButton {
+  background: #4caf50;
+  color: white;
+}
+
+.primaryButton:hover {
+  background: #43a047;
+}
+
+.secondaryButton {
+  background: #f5f5f5;
+  color: #2c3e50;
+  border: 1px solid #ddd;
+}
+
+.secondaryButton:hover {
+  background: #e0e0e0;
+}
+
+.prescreeningContainer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.prescreeningCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.prescreeningTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prescreeningTitle::before {
+  content: "";
+  width: 3px;
+  height: 20px;
+  background: #4caf50;
+  border-radius: 2px;
+}
+
+.questionInputWrapper {
+  margin-bottom: 1rem;
+}
+
+.questionInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.questionInput:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.prescreeningActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.addQuestionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.addIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.saveQuestionsButton {
+  background: #4caf50;
+  color: white;
+}
+
+.saveQuestionsButton:hover {
+  background: #43a047;
+}
+
+.outreachTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.outreachTextarea:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.outreachFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.whatsappStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.whatsappIcon {
+  color: #4caf50;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.sendButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #4caf50;
+  color: white;
+}
+
+.sendButton:hover {
+  background: #43a047;
+}
+
+.sendIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .searchContainer {
+    padding: 1rem;
+  }
+
+  .searchForm {
+    flex-direction: column;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
+
+  .resultsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .outreachFooter {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .whatsappStatus {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sendButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .prescreeningActions {
+    flex-direction: column;
+  }
+
+  .addQuestionButton,
+  .saveQuestionsButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.profileCard {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.profileCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.profileHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid #f1f5f9;
+  position: relative;
+}
+
+.profileAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4caf50;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.profileEmail {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.profileMatch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.matchScore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: #f0fdf4;
+  color: #4caf50;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.profileDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.skillsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skillsLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.skillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skillTag {
+  padding: 0.25rem 0.75rem;
+  background: #f1f5f9;
+  color: #4caf50;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.skillTag:hover {
+  background: #4caf50;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.experienceSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.experienceLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.experienceValue {
+  font-size: 1rem;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.experienceIcon {
+  color: #4caf50;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.prescreeningToggle {
+  background: #f8fafc;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prescreeningToggle:hover {
+  background: #f1f5f9;
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.sendButton {
+  background: linear-gradient(135deg, #4caf50, #43a047);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(76, 175, 80, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.sendButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -1px rgba(76, 175, 80, 0.3);
+}
+
+.sendButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.sendIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}

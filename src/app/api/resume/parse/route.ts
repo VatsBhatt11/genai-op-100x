@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/src/lib/prisma";
-import { ResumeParser } from "@/src/lib/resumeParser";
-import { getServerSession } from "next-auth/next";
+import { prisma } from "@/lib/prisma";
+import { ResumeParser } from "@/lib/resumeParser";
+import { getServerSession } from "next-auth";
+import { initResumeCollection, processResume } from "@/lib/document-processor";
+import axios from "axios";
 
 export async function POST(req: Request) {
   try {
@@ -40,24 +42,60 @@ export async function POST(req: Request) {
       where: { userId: user.id },
       data: {
         fullName: parsedResume.name,
-        parsedProfile: parsedResume,
+        parsedProfile: parsedResume as any, // Type assertion for JSON field
         rawResumeText: parsedResume.text,
         resumeText: parsedResume.text,
         resumeUrl: resumeUrl,
         skills: parsedResume.skills,
         experience: parsedResume.experience,
-        education: parsedResume.education,
-        workHistory: parsedResume.workHistory,
-        certifications: parsedResume.certifications,
+        education: parsedResume.education as any, // Type assertion for JSON field
+        workHistory: parsedResume.workHistory as any, // Type assertion for JSON field
+        certifications: parsedResume.certifications.map((cert) => cert.name), // Convert to string array
         languages: parsedResume.languages,
         completionScore: calculateCompletionScore(parsedResume),
       },
     });
 
-    return NextResponse.json(
-      { message: "Resume parsed successfully" },
-      { status: 200 }
-    );
+    // Initialize Qdrant collection and store resume chunks
+    try {
+      console.log("Initializing Qdrant collection...");
+      await initResumeCollection();
+      console.log("Qdrant collection initialized successfully");
+
+      // Download the PDF file
+      const response = await axios.get(resumeUrl, {
+        responseType: "arraybuffer",
+      });
+      const buffer = Buffer.from(response.data);
+
+      // Process resume and store chunks in Qdrant
+      console.log("Processing resume for vector storage...");
+      const processResult = await processResume(
+        buffer,
+        user.candidateProfile.id,
+        resumeUrl.split("/").pop() || "resume.pdf"
+      );
+      console.log("Resume chunks stored in Qdrant:", processResult);
+
+      return NextResponse.json(
+        {
+          message: "Resume parsed and processed successfully",
+          chunksCount: processResult.chunksCount,
+        },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.error("Error processing resume for vector storage:", error);
+      // Still return success for parsing, but include error message for vector storage
+      return NextResponse.json(
+        {
+          message:
+            "Resume parsed successfully but failed to process for vector storage",
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+        { status: 200 }
+      );
+    }
   } catch (error) {
     console.error("Resume parsing error:", error);
     return NextResponse.json(

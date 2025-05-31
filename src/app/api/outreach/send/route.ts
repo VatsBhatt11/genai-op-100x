@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/src/lib/auth";
-import { prisma } from "@/src/lib/prisma";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { CandidateProfile, User } from "@prisma/client";
+import { Session } from "next-auth";
 
 const outreachSchema = z.object({
   candidateIds: z.array(z.string()).min(1),
@@ -13,7 +15,9 @@ const outreachSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session & {
+      user: { id: string; role: string };
+    };
 
     if (!session?.user || session.user.role !== "COMPANY") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,36 +51,51 @@ export async function POST(request: NextRequest) {
 
     // Create notifications for each candidate
     const notifications = await Promise.all(
-      candidates.map(async (candidate) => {
-        // Create notification
-        const notification = await prisma.notification.create({
-          data: {
-            senderId: session.user.id,
-            receiverId: candidate.user.id,
-            type: "MESSAGE",
-            title: subject,
-            content: message,
-            metadata: {
-              templateId,
-              candidateId: candidate.id,
+      candidates.map(
+        async (
+          candidate: CandidateProfile & { user: Pick<User, "id" | "email"> }
+        ) => {
+          // Create outreach record first
+          const outreach = await prisma.outreach.create({
+            data: {
+              senderId: session.user.id,
+              receiverId: candidate.user.id,
+              message: `${subject}\n\n${message}`,
             },
-          },
-        });
+          });
 
-        // Create message log
-        await prisma.messageLog.create({
-          data: {
-            senderId: session.user.id,
-            receiverId: candidate.user.id,
-            channel: "PLATFORM",
-            content: `${subject}\n\n${message}`,
-            status: "SENT",
-            sentAt: new Date(),
-          },
-        });
+          // Create notification with outreachId
+          const notification = await prisma.notification.create({
+            data: {
+              senderId: session.user.id,
+              receiverId: candidate.user.id,
+              type: "MESSAGE",
+              title: subject,
+              content: message,
+              outreachId: outreach.id,
+              metadata: {
+                templateId,
+                candidateId: candidate.id,
+                outreachId: outreach.id,
+              },
+            },
+          });
 
-        return notification;
-      })
+          // Create message log
+          await prisma.messageLog.create({
+            data: {
+              senderId: session.user.id,
+              receiverId: candidate.user.id,
+              channel: "PLATFORM",
+              content: `${subject}\n\n${message}`,
+              status: "SENT",
+              sentAt: new Date(),
+            },
+          });
+
+          return notification;
+        }
+      )
     );
 
     return NextResponse.json({

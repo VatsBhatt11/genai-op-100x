@@ -1,0 +1,235 @@
+.searchContainer {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  min-height: 100vh;
+}
+
+.searchForm {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.searchInputWrapper:focus-within {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: color 0.3s ease;
+}
+
+.searchInputWrapper:focus-within .searchIcon {
+  color: #3b82f6;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 3rem;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  font-size: 1rem;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.clearButton {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.searchButton {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -1px rgba(37, 99, 235, 0.3);
+}
+
+.searchButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.resultsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.candidateCard {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.candidateCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.candidateCard:hover::before {
+  transform: scaleX(1);
+}
+
+.candidateHeader {
+  margin-bottom: 1rem;
+}
+
+.candidateName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.candidateTitle {
+  display: block;
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.candidateLocation {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.candidateBio {
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.skillsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.skillTag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.skillTag:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.outreachButton {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.outreachButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+@media (max-width: 768px) {
+  .searchContainer {
+    padding: 1rem;
+  }
+
+  .searchForm {
+    flex-direction: column;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
+
+  .resultsContainer {
+    grid-template-columns: 1fr;
+  }
+}

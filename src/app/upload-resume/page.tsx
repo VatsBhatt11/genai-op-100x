@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { UploadButton } from "@uploadthing/react"
 import { toast } from "sonner"
 import "../../styles/upload.css"
-import type { OurFileRouter } from "@/src/lib/uploadthing"
+import type { OurFileRouter } from "@/lib/uploadthing"
 
 export default function UploadResumePage() {
   const router = useRouter()

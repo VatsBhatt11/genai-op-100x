@@ -1,0 +1,161 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.backButton:hover {
+  color: #333;
+  transform: translateX(-5px);
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 1rem 0;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.submissionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.submissionCard {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.submissionCard:hover {
+  transform: translateY(-2px);
+}
+
+.submissionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.candidateInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.submissionDate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.answersList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.answerContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.questionText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.answerText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.noSubmissions {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submissionCard {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .submissionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,111 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.companyLogo {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.companyInfo h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.companyInfo p {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0.5rem 0 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.questionContainer {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.questionContainer:hover {
+  transform: translateX(8px);
+}
+
+.questionLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.questionText {
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.answerInput {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.answerInput:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
+.submitButton {
+  background: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #0051a8;
+}
+
+.submitButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
