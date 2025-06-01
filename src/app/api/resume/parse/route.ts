@@ -2,12 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ResumeParser } from "@/lib/resumeParser";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { initResumeCollection, processResume } from "@/lib/document-processor";
 import axios from "axios";
+import { Session } from "next-auth";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = (await getServerSession(authOptions)) as Session & {
+      user?: {
+        email?: string;
+      };
+    };
     if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
