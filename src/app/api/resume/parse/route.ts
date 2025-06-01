@@ -64,9 +64,9 @@ export async function POST(req: Request) {
 
     // Initialize Qdrant collection and store resume chunks
     try {
-      // // console.log("Initializing Qdrant collection...");
+      console.log("Initializing Qdrant collection...");
       await initResumeCollection();
-      // // console.log("Qdrant collection initialized successfully");
+      console.log("Qdrant collection initialized successfully");
 
       // Download the PDF file
       const response = await axios.get(resumeUrl, {
@@ -75,13 +75,13 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(response.data);
 
       // Process resume and store chunks in Qdrant
-      // console.log("Processing resume for vector storage...");
+      console.log("Processing resume for vector storage...");
       const processResult = await processResume(
         buffer,
         user.candidateProfile.id,
         resumeUrl.split("/").pop() || "resume.pdf"
       );
-      // console.log("Resume chunks stored in Qdrant:", processResult);
+      console.log("Resume chunks stored in Qdrant:", processResult);
 
       return NextResponse.json(
         {
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         { status: 200 }
       );
     } catch (error) {
-      // console.error("Error processing resume for vector storage:", error);
+      console.error("Error processing resume for vector storage:", error);
       // Still return success for parsing, but include error message for vector storage
       return NextResponse.json(
         {
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
-    // console.error("Resume parsing error:", error);
+    console.error("Resume parsing error:", error);
     return NextResponse.json(
       { message: "Failed to parse resume" },
       { status: 500 }

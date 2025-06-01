@@ -14,8 +14,8 @@ import { Session } from 'next-auth'
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "JobMatch AI",
-  description: "AI-powered job matching platform",
+  title: "HireAI",
+  description: "AI-powered hiring copilot",
 }
 
 export default async function RootLayout({

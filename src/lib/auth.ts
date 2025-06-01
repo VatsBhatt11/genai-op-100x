@@ -29,49 +29,63 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email and password required");
-        }
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.log("Missing credentials");
+            throw new Error("Email and password required");
+          }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user || !user.password) {
-          throw new Error("No user found");
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          throw new Error("Invalid password");
-        }
-
-        if (user.role === "COMPANY") {
-          // Create company profile if it doesn't exist
-          const existingProfile = await prisma.companyProfile.findUnique({
-            where: { userId: user.id },
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
           });
 
-          if (!existingProfile) {
-            await prisma.companyProfile.create({
-              data: {
-                userId: user.id,
-                name: user.email.split("@")[0],
-                description: "Welcome to our platform!",
-              },
-            });
+          if (!user) {
+            console.log("No user found for email:", credentials.email);
+            throw new Error("No user found");
           }
-        }
 
-        return {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        };
+          if (!user.password) {
+            console.log("User has no password set");
+            throw new Error("Invalid user configuration");
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordValid) {
+            console.log("Invalid password for user:", credentials.email);
+            throw new Error("Invalid password");
+          }
+
+          if (user.role === "COMPANY") {
+            // Create company profile if it doesn't exist
+            const existingProfile = await prisma.companyProfile.findUnique({
+              where: { userId: user.id },
+            });
+
+            if (!existingProfile) {
+              await prisma.companyProfile.create({
+                data: {
+                  userId: user.id,
+                  name: user.email.split("@")[0],
+                  description: "Welcome to our platform!",
+                },
+              });
+            }
+          }
+
+          console.log("Authentication successful for user:", user.email);
+          return {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Authentication error:", error);
+          throw error;
+        }
       },
     }),
   ],
@@ -99,7 +113,7 @@ export const authOptions = {
     signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Enable debug mode
 };
 
 const handler = NextAuth(authOptions);

@@ -7,7 +7,7 @@
     "build": "prisma generate --no-engine && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate --no-engine && npm install --platform=linux --arch=x64 sharp@0.32.6",
+    "postinstall": "prisma generate --no-engine",
     "prisma": "prisma generate && prisma migrate dev"
   },
   "dependencies": {
@@ -74,7 +74,7 @@
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
-    "sharp": "0.32.6",
+    "sharp": "^0.32.6",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",

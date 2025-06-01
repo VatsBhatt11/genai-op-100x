@@ -11,17 +11,17 @@ export default function HomePage() {
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">
-            Find Your Next Career Opportunity
+            HireAI
           </h1>
+          <h2 style={{ color: "#6366f1",marginBottom:"1rem" }}>
+            AI-Powered Hiring Copilot
+          </h2>
           <p className="hero-subtitle">
-            Connect with top companies and discover opportunities that match your skills and aspirations
+            Transform your hiring process with our intelligent copilot. Find specialized talent, screen candidates, and launch personalized outreach - all in plain English.
           </p>
           <div className="hero-actions">
-            <Link href="/jobs" className="btn btn-primary">
-              Browse Jobs
-            </Link>
-            <Link href="/signup" className="btn btn-secondary">
-              Get Started
+            <Link href="/signup" className="btn btn-primary">
+              Start Hiring
             </Link>
           </div>
         </div>
@@ -30,25 +30,25 @@ export default function HomePage() {
       <div className="features-section">
         <div className="feature-card">
           <div className="feature-icon">🔍</div>
-          <h3 className="feature-title">Smart Job Matching</h3>
+          <h3 className="feature-title">Natural Language Search</h3>
           <p className="feature-description">
-            Our AI-powered platform matches you with opportunities that align with your skills and career goals
+            Simply describe your ideal candidate in plain English. Our AI understands complex requirements and finds the perfect match.
           </p>
         </div>
 
         <div className="feature-card">
-          <div className="feature-icon">💼</div>
-          <h3 className="feature-title">Direct Company Access</h3>
+          <div className="feature-icon">⚡</div>
+          <h3 className="feature-title">60-Day to 60-Minute</h3>
           <p className="feature-description">
-            Connect directly with hiring managers and skip the traditional application process
+            Reduce time-to-hire from months to minutes. Our AI instantly ranks and screens candidates, eliminating manual processes.
           </p>
         </div>
 
         <div className="feature-card">
-          <div className="feature-icon">📈</div>
-          <h3 className="feature-title">Career Growth</h3>
+          <div className="feature-icon">🎯</div>
+          <h3 className="feature-title">Bias-Free Matching</h3>
           <p className="feature-description">
-            Access resources and tools to help you advance your career and achieve your professional goals
+            Our AI focuses on skills and experience, ensuring fair and objective candidate selection while maintaining diversity.
           </p>
         </div>
       </div>
