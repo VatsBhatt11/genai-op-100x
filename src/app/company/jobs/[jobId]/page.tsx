@@ -1,68 +1,198 @@
 "use client"
 import { useRouter, useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { Loader2, Trash2, Edit, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+interface Job {
+  id: string
+  title: string
+  description: string
+  location: string
+  experience: string
+  employmentType: string
+  isRemote: boolean
+  skills: string[]
+  status: string
+  createdAt: string
+  preScreeningQuestions?: {
+    id: string
+    question: string
+    answer: string
+  }[]
+}
+
+interface Candidate {
+  id: string
+  fullName: string
+  skills: string[]
+  experience: string
+  location: string
+  hasApplied: boolean
+}
 
 export default function CompanyJobDetailsPage() {
   const router = useRouter()
   const params = useParams()
-  const jobId = params.jobId
+  const jobId = params.jobId as string
+  const [job, setJob] = useState<Job | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [candidates, setCandidates] = useState<Candidate[]>([])
 
-  // Mock job data - in real app, fetch based on jobId
-  const job = {
-    id: jobId,
-    title: "Senior Software Engineer",
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA",
-    salary: "$120k - $160k",
-    type: "Full-time",
-    experience: "Senior Level",
-    posted: "2024-01-15",
-    applications: 45,
-    status: "Active",
-    description: "We are looking for a Senior Software Engineer to join our growing team...",
-    requirements: "Bachelor's degree in Computer Science, 5+ years of experience...",
-    benefits: "Health insurance, 401k matching, flexible hours, remote work options...",
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const response = await fetch(`/api/company/jobs/${jobId}`)
+        if (!response.ok) throw new Error('Failed to fetch job')
+        const data = await response.json()
+        setJob(data)
+      } catch (error) {
+        // console.error('Error fetching job:', error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch job details",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    const fetchCandidates = async () => {
+      try {
+        const response = await fetch(`/api/company/jobs/${jobId}/candidates`)
+        if (!response.ok) throw new Error('Failed to fetch candidates')
+        const data = await response.json()
+        setCandidates(data)
+      } catch (error) {
+        // console.error('Error fetching candidates:', error)
+      }
+    }
+
+    fetchJob()
+    fetchCandidates()
+  }, [jobId])
+
+  const handleGenerateQuestions = async () => {
+    if (!job) return
+
+    setIsGeneratingQuestions(true)
+    try {
+      const response = await fetch('/api/pre-screening/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          jobTitle: job.title,
+          jobDescription: job.description,
+          skills: job.skills,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to generate questions')
+      
+      const data = await response.json()
+      setJob(prev => prev ? { ...prev, preScreeningQuestions: data.questions } : null)
+      
+      toast({
+        title: "Success",
+        description: "Pre-screening questions generated successfully",
+      })
+    } catch (error) {
+      // console.error('Error generating questions:', error)
+      toast({
+        title: "Error",
+        description: "Failed to generate pre-screening questions",
+        variant: "destructive",
+      })
+    } finally {
+      setIsGeneratingQuestions(false)
+    }
   }
 
-  const applications = [
-    { id: 1, name: "John Doe", title: "Software Engineer", experience: "6 years", status: "New", avatar: "👨‍💻" },
-    {
-      id: 2,
-      name: "Jane Smith",
-      title: "Full Stack Developer",
-      experience: "8 years",
-      status: "Reviewed",
-      avatar: "👩‍💻",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      title: "Senior Developer",
-      experience: "10 years",
-      status: "Interview",
-      avatar: "👨‍💼",
-    },
-    { id: 4, name: "Sarah Wilson", title: "Software Engineer", experience: "5 years", status: "New", avatar: "👩‍💼" },
-  ]
+  const handleDelete = async () => {
+    if (!job) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/company/jobs/${job.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete job')
+      
+      toast({
+        title: "Success",
+        description: "Job deleted successfully",
+      })
+      
+      router.push('/company/jobs')
+    } catch (error) {
+      // console.error('Error deleting job:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete job",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!job) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg text-gray-600">Job not found</p>
+      </div>
+    )
+  }
 
   return (
     <div className="job-details-page">
       <div className="page-container">
         <header className="page-header">
-          <button className="back-btn" onClick={() => router.push("/company/jobs")}>
-            ← Back to Jobs
-          </button>
+          <Button
+            variant="ghost"
+            className="back-btn"
+            onClick={() => router.push("/company/jobs")}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Jobs
+          </Button>
           <div className="job-info">
             <h1 className="job-title">{job.title}</h1>
             <div className="job-meta">
               <span>📍 {job.location}</span>
-              <span>💰 {job.salary}</span>
-              <span>📅 Posted {job.posted}</span>
+              <span>👨‍💻 {job.experience}</span>
+              <span>💼 {job.employmentType}</span>
+              <span>{job.isRemote ? "🌐 Remote" : "🏢 On-site"}</span>
               <span className={`status-badge ${job.status.toLowerCase()}`}>{job.status}</span>
             </div>
           </div>
           <div className="job-actions">
-            <button className="btn-secondary">Edit Job</button>
-            <button className="btn-danger">Delete Job</button>
+          <button className="btn-danger" onClick={() => handleDelete()}>Delete</button>
           </div>
         </header>
 
@@ -70,44 +200,87 @@ export default function CompanyJobDetailsPage() {
           <div className="job-content">
             <section className="content-section">
               <h2>Job Description</h2>
-              <p>{job.description}</p>
+              <p style={{color:"black"}}>{job.description}</p>
             </section>
 
             <section className="content-section">
-              <h2>Requirements</h2>
-              <p>{job.requirements}</p>
+              <h2>Required Skills</h2>
+              <div className="skills-list">
+                {job.skills.map((skill, index) => (
+                  <span key={index} className="skill-tag">
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </section>
 
             <section className="content-section">
-              <h2>Benefits</h2>
-              <p>{job.benefits}</p>
-            </section>
-          </div>
-
-          <div className="applications-sidebar">
-            <div className="applications-header">
-              <h2>Applications ({job.applications})</h2>
-              <button className="btn-primary">View All</button>
-            </div>
-
-            <div className="applications-list">
-              {applications.map((application) => (
-                <div key={application.id} className="application-card">
-                  <div className="application-header">
-                    <span className="avatar">{application.avatar}</span>
-                    <div className="applicant-info">
-                      <h4>{application.name}</h4>
-                      <p>{application.title}</p>
-                      <small>{application.experience} experience</small>
+              <div className="section-header">
+                <h2>Pre-screening Questions</h2>
+                <button className="btn-primary" onClick={handleGenerateQuestions} disabled={isGeneratingQuestions}>
+                {isGeneratingQuestions ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    "Generate Questions"
+                  )}
+                </button>
+                
+              </div>
+              
+              {job.preScreeningQuestions ? (
+                <div className="questions-list">
+                  {job.preScreeningQuestions.map((qa, index) => (
+                    <div key={qa.id} className="question-card">
+                      <h3>Question {index + 1}</h3>
+                      <p className="question">{qa.question}</p>
+                      <p className="answer">{qa.answer}</p>
                     </div>
-                  </div>
-                  <div className="application-footer">
-                    <span className={`app-status ${application.status.toLowerCase()}`}>{application.status}</span>
-                    <button className="view-btn">View</button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              ) : (
+                <p className="text-gray-500">
+                  No pre-screening questions generated yet. Click the button above to generate questions.
+                </p>
+              )}
+            </section>
+
+            <section className="content-section">
+              <h2>Selected Candidates</h2>
+              {candidates.length > 0 ? (
+                <div className="candidates-list">
+                  {candidates.map((candidate) => (
+                    <div key={candidate.id} className="candidate-card">
+                      <div className="candidate-info">
+                        <h3>{candidate.fullName}</h3>
+                        <div className="candidate-meta">
+                          <span>📍 {candidate.location}</span>
+                          <span>👨‍💻 {candidate.experience}</span>
+                        </div>
+                        <div className="skills-list">
+                          {candidate.skills.map((skill, index) => (
+                            <span key={index} className="skill-tag">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="candidate-status">
+                        <span className={`status-badge ${candidate.hasApplied ? 'applied' : 'pending'}`}>
+                          {candidate.hasApplied ? 'Applied' : 'Pending'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">
+                  No candidates have been selected for this job yet.
+                </p>
+              )}
+            </section>
           </div>
         </div>
       </div>
@@ -133,12 +306,7 @@ export default function CompanyJobDetailsPage() {
         }
 
         .back-btn {
-          background: transparent;
-          border: none;
-          color: #667eea;
-          cursor: pointer;
           margin-bottom: 1rem;
-          font-size: 0.875rem;
         }
 
         .job-info {
@@ -173,14 +341,40 @@ export default function CompanyJobDetailsPage() {
           color: #166534;
         }
 
+        .status-badge.applied {
+          background: #dcfce7;
+          color: #166534;
+        }
+
+        .status-badge.pending {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
         .job-actions {
           display: flex;
           gap: 1rem;
         }
 
+        .btn-primary {
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
         .content-grid {
           display: grid;
-          grid-template-columns: 2fr 1fr;
+          grid-template-columns: 1fr;
           gap: 2rem;
         }
 
@@ -202,140 +396,136 @@ export default function CompanyJobDetailsPage() {
           margin-bottom: 1rem;
         }
 
-        .content-section p {
-          color: #4a5568;
-          line-height: 1.6;
-        }
-
-        .applications-sidebar {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          height: fit-content;
-        }
-
-        .applications-header {
+        .section-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 1rem;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid #e2e8f0;
         }
 
-        .applications-header h2 {
-          font-size: 1.125rem;
-          font-weight: 600;
-          color: #1a202c;
+        .skills-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
         }
 
-        .applications-list {
+        .skill-tag {
+          background: #e2e8f0;
+          color: #4a5568;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.875rem;
+        }
+
+        .questions-list {
           display: flex;
           flex-direction: column;
           gap: 1rem;
         }
 
-        .application-card {
-          padding: 1rem;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          transition: all 0.3s ease;
-        }
-
-        .application-card:hover {
-          border-color: #667eea;
+        .question-card {
           background: #f7fafc;
+          padding: 1rem;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
         }
 
-        .application-header {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
+        .question-card h3 {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #1a202c;
           margin-bottom: 0.5rem;
         }
 
-        .avatar {
-          font-size: 1.5rem;
-        }
-
-        .applicant-info h4 {
-          margin: 0;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #1a202c;
-        }
-
-        .applicant-info p {
-          margin: 0;
-          font-size: 0.75rem;
+        .question {
           color: #4a5568;
+          margin-bottom: 0.5rem;
         }
 
-        .applicant-info small {
-          font-size: 0.75rem;
+        .answer {
           color: #718096;
+          font-size: 0.875rem;
         }
 
-        .application-footer {
+        .candidates-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .candidate-card {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          padding: 1rem;
+          background: #f7fafc;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
         }
 
-        .app-status {
-          padding: 0.25rem 0.5rem;
-          border-radius: 12px;
-          font-size: 0.75rem;
-          font-weight: 500;
+        .candidate-info {
+          flex: 1;
         }
 
-        .app-status.new {
-          background: #ddd6fe;
-          color: #5b21b6;
+        .candidate-info h3 {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #1a202c;
+          margin-bottom: 0.5rem;
         }
 
-        .app-status.reviewed {
-          background: #fef3c7;
-          color: #92400e;
+        .candidate-meta {
+          display: flex;
+          gap: 1rem;
+          font-size: 0.875rem;
+          color: #4a5568;
+          margin-bottom: 0.5rem;
         }
 
-        .app-status.interview {
-          background: #dcfce7;
-          color: #166534;
-        }
-
-        .view-btn {
-          background: transparent;
-          color: #667eea;
-          border: none;
-          font-size: 0.75rem;
-          cursor: pointer;
-          text-decoration: underline;
+        .candidate-status {
+          margin-left: 1rem;
         }
 
         .btn-primary {
           background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
           border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          font-size: 0.875rem;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
           font-weight: 600;
           cursor: pointer;
+          transition: all 0.3s ease;
         }
 
-        .btn-secondary {
-          background: #f7fafc;
-          color: #4a5568;
-          border: 1px solid #e2e8f0;
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          font-size: 0.875rem;
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-destructive {
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
           cursor: pointer;
+          transition: all 0.3s ease;
         }
 
-        .btn-danger {
+        .btn-destructive:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-destructive:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+         .btn-danger {
           background: #e53e3e;
           color: white;
           border: none;
@@ -343,16 +533,7 @@ export default function CompanyJobDetailsPage() {
           border-radius: 6px;
           font-size: 0.875rem;
           cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-          .content-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .job-actions {
-            flex-direction: column;
-          }
+          transition: all 0.3s ease;
         }
       `}</style>
     </div>

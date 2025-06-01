@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Badge } from "@/src/components/ui/badge"
-import { Checkbox } from "@/src/components/ui/checkbox"
-import { OutreachModal } from "@/src/components/OutreachModal"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import { OutreachModal } from "@/components/OutreachModal"
 import { Search, MapPin, Briefcase, Send } from "lucide-react"
-import "@/src/styles/company-candidates.css"
+import "@/styles/company-candidates.css"
 
 interface Candidate {
   id: string
@@ -47,7 +47,7 @@ export default function CompanyCandidatesPage() {
         setCandidates(data.candidates)
       }
     } catch (error) {
-      console.error("Failed to fetch candidates:", error)
+      // console.error("Failed to fetch candidates:", error)
     } finally {
       setIsLoading(false)
     }
@@ -90,6 +90,7 @@ export default function CompanyCandidatesPage() {
             {selectedCandidates.length > 0 && (
               <OutreachModal
                 candidates={selectedCandidateData}
+                searchQuery={searchTerm}
                 trigger={
                   <Button>
                     <Send className="w-4 h-4 mr-2" />
@@ -202,6 +203,7 @@ export default function CompanyCandidatesPage() {
                             skills: candidate.skills || [],
                           },
                         ]}
+                        searchQuery={searchTerm}
                         trigger={
                           <Button variant="outline" size="sm">
                             <Send className="w-4 h-4 mr-2" />

@@ -120,6 +120,10 @@ export default function SignUpPage() {
             {isLoading ? "Creating account..." : "Create account"}
           </button>
         </form>
+        <div className="auth-toggle">
+          <p>Already a user?</p>
+          <a href="/login">Login</a>
+        </div>
       </div>
     </div>
   )

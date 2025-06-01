@@ -25,7 +25,7 @@ export default function CompanyJobNewPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Job posting data:", formData)
+    // console.log("Job posting data:", formData)
     router.push("/company/jobs")
   }
 

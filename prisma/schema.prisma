@@ -45,16 +45,16 @@ model User {
   accounts                Account[]
   applications            Application[]
   candidateProfile        CandidateProfile?
-  CompanyProfile          CompanyProfile?
-  jobs                    Job[]
+  companyProfile          CompanyProfile?
+  jobs                    Job[]                    @relation("CompanyJobs")
   messageLogs             MessageLog[]
   messageTemplates        MessageTemplate[]
   receivedNotifications   Notification[]           @relation("NotificationReceiver")
   sentNotifications       Notification[]           @relation("NotificationSender")
-  receivedOutreach        Outreach[]               @relation("ReceivedOutreach")
-  sentOutreach            Outreach[]               @relation("SentOutreach")
-  PreScreening            PreScreening[]
-  PreScreeningSubmissions PreScreeningSubmission[]
+  receivedOutreach        Outreach[]               @relation("ReceiverOutreach")
+  sentOutreach            Outreach[]               @relation("SenderOutreach")
+  preScreenings           PreScreening[]           @relation("CompanyPreScreenings")
+  preScreeningSubmissions PreScreeningSubmission[]
   sessions                Session[]
 
   @@index([email])
@@ -105,15 +105,17 @@ model Job {
   isRemote       Boolean       @default(false)
   skills         String[]
   searchVector   String?
+  status         String        @default("ACTIVE")
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   applications   Application[]
-  company        User          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company        User          @relation("CompanyJobs", fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId])
   @@index([skills])
-  @@index([location])
   @@index([createdAt])
+  @@index([location])
+  @@index([status])
 }
 
 model Application {
@@ -222,8 +224,8 @@ model PreScreening {
   questions   String[]
   createdAt   DateTime                 @default(now())
   updatedAt   DateTime                 @updatedAt
-  outreach    Outreach[]
-  company     User                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  Outreach    Outreach[]
+  company     User                     @relation("CompanyPreScreenings", fields: [companyId], references: [id], onDelete: Cascade)
   submissions PreScreeningSubmission[]
 
   @@index([companyId])
@@ -252,8 +254,8 @@ model Outreach {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   preScreening   PreScreening? @relation(fields: [preScreeningId], references: [id])
-  receiver       User          @relation("ReceivedOutreach", fields: [receiverId], references: [id], onDelete: Cascade)
-  sender         User          @relation("SentOutreach", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver       User          @relation("ReceiverOutreach", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender         User          @relation("SenderOutreach", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])

@@ -24,7 +24,7 @@ export function NotificationBell() {
         setNotifications(data)
         setUnreadCount(Array.isArray(data) ? data.filter((n: NotificationType) => !n.isRead).length : 0)
       } catch (error) {
-        console.error("Failed to fetch notifications:", error)
+        // console.error("Failed to fetch notifications:", error)
       }
     }
 

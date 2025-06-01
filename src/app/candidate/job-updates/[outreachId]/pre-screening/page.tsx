@@ -28,7 +28,7 @@ export default function PreScreeningPage({
         const data = await response.json();
         setPreScreening(data);
       } catch (error) {
-        console.error('Failed to fetch questions:', error);
+        // console.error('Failed to fetch questions:', error);
         router.push('/dashboard');
       }
     };
@@ -60,7 +60,7 @@ export default function PreScreeningPage({
         router.push(`/candidate/job-updates/${params.outreachId}`);
       }
     } catch (error) {
-      console.error('Failed to submit answers:', error);
+      // console.error('Failed to submit answers:', error);
     } finally {
       setIsSubmitting(false);
     }

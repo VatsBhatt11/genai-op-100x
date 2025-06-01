@@ -16,11 +16,18 @@ interface CandidateProfileCardProps {
     phoneNumber?: string;
   };
   matchScore?: number;
+  matchDetails?: {
+    matchingSkills: string[];
+    locationMatch: boolean;
+    experienceMatch: boolean;
+    employmentTypeMatch: boolean;
+  };
   onSelect?: (id: string) => void;
   isSelected?: boolean;
+  onOutreach?: (profile: any) => void;
 }
 
-export function CandidateProfileCard({ profile, matchScore, onSelect, isSelected }: CandidateProfileCardProps) {
+export function CandidateProfileCard({ profile, matchScore, matchDetails, onSelect, isSelected }: CandidateProfileCardProps) {
   return (
     <div
       // initial={{ opacity: 0, y: 20 }}

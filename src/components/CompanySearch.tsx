@@ -87,8 +87,8 @@ export function CompanySearch() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           candidateIds: Array.from(selectedProfiles),
-          subject: "New Job Opportunity",
           message: outreachMessage,
+          query: query || "Looking for candidates",
         }),
       });
 
@@ -100,11 +100,14 @@ export function CompanySearch() {
         });
         setSelectedProfiles(new Set());
         setOutreachMessage('');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send outreach');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to send outreach messages",
+        description: error instanceof Error ? error.message : "Failed to send outreach messages",
         variant: "destructive",
       });
     } finally {
@@ -284,9 +287,9 @@ export function CompanySearch() {
 
       <div className={styles.resultsGrid}>
         <AnimatePresence>
-          {results.map((result) => (
+          {results.map((result, index) => (
             <motion.div
-              key={result.profile.id}
+              key={`${result.profile.id}-${index}`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}

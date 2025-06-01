@@ -7,7 +7,7 @@ export const markAsRead = async (notificationId: string) => {
       throw new Error("Failed to mark notification as read");
     }
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+    // console.error("Error marking notification as read:", error);
     throw error;
   }
 };

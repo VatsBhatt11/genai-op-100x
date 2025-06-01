@@ -5,29 +5,30 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { CandidateProfile, User } from "@prisma/client";
 import { Session } from "next-auth";
+import { generateJobFromQuery } from "@/lib/groq";
 
 const outreachSchema = z.object({
-  candidateIds: z.array(z.string()).min(1),
-  subject: z.string().min(1),
+  candidateIds: z.array(z.string()),
   message: z.string().min(1),
-  templateId: z.string().optional(),
+  query: z.string().min(1), // The natural language query used for search
 });
 
 export async function POST(request: NextRequest) {
   try {
     const session = (await getServerSession(authOptions)) as Session & {
-      user: { id: string; role: string };
+      user: {
+        id: string;
+        role: string;
+      };
     };
 
     if (!session?.user || session.user.role !== "COMPANY") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
-    const { candidateIds, subject, message, templateId } =
-      outreachSchema.parse(body);
+    const { candidateIds, message, query } = outreachSchema.parse(body);
 
-    // Get candidate profiles
     const candidates = await prisma.candidateProfile.findMany({
       where: {
         id: { in: candidateIds },
@@ -49,6 +50,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate job data from the search query
+    const jobData = await generateJobFromQuery(query);
+
+    // Create the job posting with only valid fields
+    const job = await prisma.job.create({
+      data: {
+        title: jobData.title,
+        description: jobData.description,
+        location: jobData.location,
+        experience: jobData.experience,
+        employmentType: jobData.employmentType,
+        isRemote: jobData.isRemote,
+        skills: jobData.skills,
+        companyId: session.user.id,
+        status: "ACTIVE",
+      },
+    });
+
     // Create notifications for each candidate
     const notifications = await Promise.all(
       candidates.map(
@@ -60,23 +79,23 @@ export async function POST(request: NextRequest) {
             data: {
               senderId: session.user.id,
               receiverId: candidate.user.id,
-              message: `${subject}\n\n${message}`,
+              message,
             },
           });
 
-          // Create notification with outreachId
+          // Create notification
           const notification = await prisma.notification.create({
             data: {
               senderId: session.user.id,
               receiverId: candidate.user.id,
               type: "MESSAGE",
-              title: subject,
+              title: "New Job Opportunity",
               content: message,
               outreachId: outreach.id,
               metadata: {
-                templateId,
                 candidateId: candidate.id,
                 outreachId: outreach.id,
+                jobId: job.id,
               },
             },
           });
@@ -87,7 +106,7 @@ export async function POST(request: NextRequest) {
               senderId: session.user.id,
               receiverId: candidate.user.id,
               channel: "PLATFORM",
-              content: `${subject}\n\n${message}`,
+              content: message,
               status: "SENT",
               sentAt: new Date(),
             },
@@ -102,9 +121,10 @@ export async function POST(request: NextRequest) {
       success: true,
       sentCount: notifications.length,
       notifications,
+      jobId: job.id,
     });
   } catch (error) {
-    console.error("Send outreach error:", error);
+    // console.error("Send outreach error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

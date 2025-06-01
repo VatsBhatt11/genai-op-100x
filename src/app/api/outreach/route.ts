@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       notificationsSent: validNotifications.length,
     });
   } catch (error) {
-    console.error("Outreach error:", error);
+    // console.error("Outreach error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

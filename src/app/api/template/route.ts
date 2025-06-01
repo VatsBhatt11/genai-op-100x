@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
-    console.error("Create template error:", error);
+    // console.error("Create template error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(templates);
   } catch (error) {
-    console.error("Get templates error:", error);
+    // console.error("Get templates error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -47,7 +47,7 @@ export default function CompanyOutreachPage() {
         setMessageLogs(logsData)
       }
     } catch (error) {
-      console.error("Failed to fetch data:", error)
+      // console.error("Failed to fetch data:", error)
     } finally {
       setIsLoading(false)
     }

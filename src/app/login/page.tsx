@@ -79,6 +79,10 @@ export default function LoginPage() {
             {isLoading ? "Signing in..." : "Sign in"}
           </button>
         </form>
+        <div className="auth-toggle">
+          <p>New user?</p>
+          <a href="/signup">Sign up</a>
+        </div>
       </div>
     </div>
   )

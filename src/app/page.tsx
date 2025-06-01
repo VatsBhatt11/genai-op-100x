@@ -1,120 +1,211 @@
 "use client"
 
-import Logo from "../components/Logo"
-import AnimatedIllustration from "../components/AnimatedIllustration"
-import Headline from "../components/Headline"
-import Subhead from "../components/Subhead"
-import GetStartedButton from "../components/GetStartedButton"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
+  const router = useRouter()
+
   return (
-    <div className="landing-page">
+    <div className="home-container">
       <div className="hero-section">
-        <div className="container">
-          <div className="hero-content">
-            <Logo />
-            <AnimatedIllustration />
-            <Headline />
-            <Subhead />
-            <GetStartedButton />
+        <div className="hero-content">
+          <h1 className="hero-title">
+            Find Your Next Career Opportunity
+          </h1>
+          <p className="hero-subtitle">
+            Connect with top companies and discover opportunities that match your skills and aspirations
+          </p>
+          <div className="hero-actions">
+            <Link href="/jobs" className="btn btn-primary">
+              Browse Jobs
+            </Link>
+            <Link href="/signup" className="btn btn-secondary">
+              Get Started
+            </Link>
           </div>
         </div>
+      </div>
 
-        {/* Background Elements */}
-        <div className="bg-elements">
-          <div className="bg-circle bg-circle-1"></div>
-          <div className="bg-circle bg-circle-2"></div>
-          <div className="bg-circle bg-circle-3"></div>
+      <div className="features-section">
+        <div className="feature-card">
+          <div className="feature-icon">🔍</div>
+          <h3 className="feature-title">Smart Job Matching</h3>
+          <p className="feature-description">
+            Our AI-powered platform matches you with opportunities that align with your skills and career goals
+          </p>
+        </div>
+
+        <div className="feature-card">
+          <div className="feature-icon">💼</div>
+          <h3 className="feature-title">Direct Company Access</h3>
+          <p className="feature-description">
+            Connect directly with hiring managers and skip the traditional application process
+          </p>
+        </div>
+
+        <div className="feature-card">
+          <div className="feature-icon">📈</div>
+          <h3 className="feature-title">Career Growth</h3>
+          <p className="feature-description">
+            Access resources and tools to help you advance your career and achieve your professional goals
+          </p>
         </div>
       </div>
 
       <style jsx>{`
-        .landing-page {
+        .home-container {
           min-height: 100vh;
-          position: relative;
-          overflow: hidden;
+          background: linear-gradient(135deg, #f6f8fc 0%, #f1f4f9 100%);
+          padding: 2rem;
         }
-        
+
         .hero-section {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          position: relative;
-          background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 4rem 2rem;
+          text-align: center;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 24px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          margin-bottom: 4rem;
         }
-        
+
         .hero-content {
-          width: 100%;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        .hero-title {
+          font-size: 3.5rem;
+          font-weight: 700;
+          color: #1a1a1a;
+          margin-bottom: 1.5rem;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          line-height: 1.2;
+        }
+
+        .hero-subtitle {
+          font-size: 1.25rem;
+          color: #2d3748;
+          margin-bottom: 2rem;
+          line-height: 1.6;
+        }
+
+        .hero-actions {
           display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: var(--spacing-xl) 0;
-          position: relative;
-          z-index: 2;
+          gap: 1rem;
+          justify-content: center;
         }
-        
-        .bg-elements {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 1;
+
+        .btn {
+          padding: 1rem 2rem;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          text-decoration: none;
+          display: inline-block;
         }
-        
-        .bg-circle {
-          position: absolute;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-          opacity: 0.03;
-          animation: float 6s ease-in-out infinite;
+
+        .btn-primary {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
-        
-        .bg-circle-1 {
-          width: 300px;
-          height: 300px;
-          top: 10%;
-          right: -150px;
-          animation-delay: 0s;
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
         }
-        
-        .bg-circle-2 {
-          width: 200px;
-          height: 200px;
-          bottom: 20%;
-          left: -100px;
-          animation-delay: 2s;
+
+        .btn-secondary {
+          background: rgba(255, 255, 255, 0.9);
+          color: #6366f1;
+          border: 2px solid #6366f1;
         }
-        
-        .bg-circle-3 {
-          width: 150px;
-          height: 150px;
-          top: 60%;
-          right: 10%;
-          animation-delay: 4s;
+
+        .btn-secondary:hover {
+          background: #6366f1;
+          color: white;
+          transform: translateY(-2px);
         }
-        
+
+        .features-section {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 2rem;
+          padding: 2rem;
+        }
+
+        .feature-card {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 16px;
+          padding: 2rem;
+          text-align: center;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+          border-color: #6366f1;
+        }
+
+        .feature-icon {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+        }
+
+        .feature-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #1a1a1a;
+          margin-bottom: 1rem;
+        }
+
+        .feature-description {
+          color: #2d3748;
+          line-height: 1.6;
+        }
+
         @media (max-width: 768px) {
-          .hero-content {
-            padding: var(--spacing-lg) 0;
+          .home-container {
+            padding: 1rem;
           }
-          
-          .bg-circle-1 {
-            width: 200px;
-            height: 200px;
-            right: -100px;
+
+          .hero-section {
+            padding: 2rem 1rem;
           }
-          
-          .bg-circle-2 {
-            width: 150px;
-            height: 150px;
-            left: -75px;
+
+          .hero-title {
+            font-size: 2.5rem;
           }
-          
-          .bg-circle-3 {
-            width: 100px;
-            height: 100px;
+
+          .hero-subtitle {
+            font-size: 1.125rem;
+          }
+
+          .hero-actions {
+            flex-direction: column;
+          }
+
+          .btn {
+            width: 100%;
+            text-align: center;
+          }
+
+          .features-section {
+            grid-template-columns: 1fr;
+            padding: 1rem;
           }
         }
       `}</style>

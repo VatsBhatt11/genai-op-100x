@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/src/lib/auth";
-import { prisma } from "@/src/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const messageSendSchema = z.object({
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(updatedMessageLog, { status: 201 });
   } catch (error) {
-    console.error("Send message error:", error);
+    // console.error("Send message error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,47 +1,82 @@
 "use client"
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { Loader2} from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
+
+interface Job {
+  id: string
+  title: string
+  applications: number
+  status: string
+  location: string
+  experience: string
+  employmentType: string
+  isRemote: boolean
+  createdAt: string
+}
 
 export default function CompanyJobsPage() {
   const router = useRouter()
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [deletingJobId, setDeletingJobId] = useState<string | null>(null)
 
-  const jobs = [
-    {
-      id: "1",
-      title: "Senior Software Engineer",
-      applications: 45,
-      status: "Active",
-      location: "San Francisco, CA",
-      salary: "$120k - $160k",
-      postedDate: "2024-01-15",
-    },
-    {
-      id: "2",
-      title: "Product Manager",
-      applications: 32,
-      status: "Active",
-      location: "Remote",
-      salary: "$110k - $140k",
-      postedDate: "2024-01-10",
-    },
-    {
-      id: "3",
-      title: "UX Designer",
-      applications: 28,
-      status: "Draft",
-      location: "New York, NY",
-      salary: "$90k - $120k",
-      postedDate: "2024-01-08",
-    },
-    {
-      id: "4",
-      title: "Data Scientist",
-      applications: 21,
-      status: "Active",
-      location: "Austin, TX",
-      salary: "$130k - $170k",
-      postedDate: "2024-01-05",
-    },
-  ]
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('/api/company/jobs')
+        if (!response.ok) throw new Error('Failed to fetch jobs')
+        const data = await response.json()
+        setJobs(data)
+      } catch (error) {
+        // console.error('Error fetching jobs:', error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch jobs",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchJobs()
+  }, [])
+
+  const handleDelete = async (jobId: string) => {
+    setDeletingJobId(jobId)
+    try {
+      const response = await fetch(`/api/company/jobs/${jobId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete job')
+      
+      setJobs(jobs.filter(job => job.id !== jobId))
+      toast({
+        title: "Success",
+        description: "Job deleted successfully",
+      })
+    } catch (error) {
+      // console.error('Error deleting job:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete job",
+        variant: "destructive",
+      })
+    } finally {
+      setDeletingJobId(null)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="company-jobs-page">
@@ -51,9 +86,6 @@ export default function CompanyJobsPage() {
             <h1 className="page-title">Job Postings</h1>
             <p className="page-subtitle">Manage your active job listings</p>
           </div>
-          <button className="btn-primary" onClick={() => router.push("/company/jobs/new")}>
-            Post New Job
-          </button>
         </header>
 
         <div className="jobs-grid">
@@ -65,18 +97,22 @@ export default function CompanyJobsPage() {
               </div>
               <div className="job-details">
                 <p className="job-location">📍 {job.location}</p>
-                <p className="job-salary">💰 {job.salary}</p>
-                <p className="job-posted">📅 Posted {job.postedDate}</p>
-              </div>
-              <div className="job-stats">
-                <span className="applications-count">{job.applications} applications</span>
+                <p className="job-experience">👨‍💻 {job.experience}</p>
+                <p className="job-type">💼 {job.employmentType}</p>
+                <p className="job-remote">{job.isRemote ? "🌐 Remote" : "🏢 On-site"}</p>
+                <p className="job-posted">📅 Posted {new Date(job.createdAt).toLocaleDateString()}</p>
               </div>
               <div className="job-actions">
-                <button className="btn-secondary" onClick={() => router.push(`/company/jobs/${job.id}`)}>
+                {/* <Button
+                  variant="outline"
+                  onClick={() => router.push(`/company/jobs/${job.id}`)}
+                >
+                  <Eye className="w-4 h-4 mr-2" /> */}
+                                  <button className="btn-secondary" onClick={() => router.push(`/company/jobs/${job.id}`)}>
+
                   View Details
                 </button>
-                <button className="btn-outline">Edit</button>
-                <button className="btn-danger">Delete</button>
+                <button className="btn-danger" onClick={() => handleDelete(job.id)}>Delete</button>
               </div>
             </div>
           ))}
@@ -191,22 +227,22 @@ export default function CompanyJobsPage() {
           font-size: 0.875rem;
         }
 
-        .job-stats {
-          margin-bottom: 1rem;
-          padding: 0.75rem;
-          background: #f7fafc;
-          border-radius: 8px;
-        }
-
-        .applications-count {
-          color: #667eea;
-          font-weight: 600;
-        }
-
         .job-actions {
           display: flex;
           gap: 0.5rem;
           flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+          .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+
+          .jobs-grid {
+            grid-template-columns: 1fr;
+          }
         }
 
         .btn-secondary {
@@ -242,17 +278,6 @@ export default function CompanyJobsPage() {
           transition: all 0.3s ease;
         }
 
-        @media (max-width: 768px) {
-          .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-          }
-
-          .jobs-grid {
-            grid-template-columns: 1fr;
-          }
-        }
       `}</style>
     </div>
   )

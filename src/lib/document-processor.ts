@@ -7,7 +7,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-console.log(process.env.QDRANT_API_URL, process.env.QDRANT_API_KEY);
+// console.log(process.env.QDRANT_API_URL, process.env.QDRANT_API_KEY);
 
 if (!process.env.QDRANT_API_URL || !process.env.QDRANT_API_KEY) {
   throw new Error(
@@ -61,7 +61,7 @@ export async function initResumeCollection() {
     );
 
     if (!exists) {
-      console.log("Creating Qdrant collection:", RESUME_COLLECTION);
+      // console.log("Creating Qdrant collection:", RESUME_COLLECTION);
 
       // Create collection with proper configuration
       await qdrant.createCollection(RESUME_COLLECTION, {
@@ -71,12 +71,12 @@ export async function initResumeCollection() {
         },
       });
 
-      console.log("Successfully created Qdrant collection:", RESUME_COLLECTION);
+      // console.log("Successfully created Qdrant collection:", RESUME_COLLECTION);
     } else {
-      console.log("Qdrant collection already exists:", RESUME_COLLECTION);
+      // console.log("Qdrant collection already exists:", RESUME_COLLECTION);
     }
   } catch (error) {
-    console.error("Failed to initialize resume collection:", error);
+    // console.error("Failed to initialize resume collection:", error);
     throw new Error(
       `Failed to initialize Qdrant collection: ${
         error instanceof Error ? error.message : "Unknown error"
@@ -105,7 +105,7 @@ export async function processResume(
     fs.writeFileSync(tempFilePath, fileBuffer);
 
     // Parse PDF using ResumeParser
-    console.log("Parsing resume with ResumeParser...");
+    // console.log("Parsing resume with ResumeParser...");
     const parsedResume = await parser.parseResumeFromUrl(tempFilePath);
 
     // Combine all resume information into a single text for semantic search
@@ -124,11 +124,11 @@ export async function processResume(
     `.trim();
 
     // Generate embedding for the entire resume
-    console.log("Generating embedding for resume...");
+    // console.log("Generating embedding for resume...");
     const vector = await generateEmbedding(resumeText);
 
     // Delete existing chunks for this candidate
-    console.log(`Deleting existing chunks for candidate ${candidateId}...`);
+    // console.log(`Deleting existing chunks for candidate ${candidateId}...`);
     try {
       await qdrant.delete(RESUME_COLLECTION, {
         filter: {
@@ -140,13 +140,13 @@ export async function processResume(
           ],
         },
       });
-      console.log(`Deleted existing chunks for candidate ${candidateId}`);
+      // console.log(`Deleted existing chunks for candidate ${candidateId}`);
     } catch (error) {
-      console.warn(`No existing chunks found for candidate ${candidateId}`);
+      // console.warn(`No existing chunks found for candidate ${candidateId}`);
     }
 
     // Store the entire resume as a single chunk
-    console.log("Storing resume in Qdrant...");
+    // console.log("Storing resume in Qdrant...");
     try {
       await qdrant.upsert(RESUME_COLLECTION, {
         points: [
@@ -163,11 +163,11 @@ export async function processResume(
           },
         ],
       });
-      console.log("Successfully stored resume in Qdrant");
+      // console.log("Successfully stored resume in Qdrant");
     } catch (error: any) {
-      console.error("Qdrant upsert error:", error);
+      // console.error("Qdrant upsert error:", error);
       if (error.response?.data) {
-        console.error("Qdrant error details:", error.response.data);
+        // console.error("Qdrant error details:", error.response.data);
       }
       throw new Error(
         `Failed to store resume in Qdrant: ${error.message || "Unknown error"}`
@@ -179,7 +179,7 @@ export async function processResume(
       chunksCount: 1,
     };
   } catch (error) {
-    console.error("Error processing resume:", error);
+    // console.error("Error processing resume:", error);
     throw new Error(
       `Failed to process resume: ${
         error instanceof Error ? error.message : "Unknown error"
@@ -190,9 +190,9 @@ export async function processResume(
     if (tempFilePath && fs.existsSync(tempFilePath)) {
       try {
         fs.unlinkSync(tempFilePath);
-        console.log("Cleaned up temporary file:", tempFilePath);
+        // console.log("Cleaned up temporary file:", tempFilePath);
       } catch (error) {
-        console.warn("Failed to clean up temporary file:", error);
+        // console.warn("Failed to clean up temporary file:", error);
       }
     }
   }
@@ -213,7 +213,7 @@ export async function searchResumeContent(
 > {
   try {
     const queryVector = await generateEmbedding(query);
-    console.log("Searching Qdrant with query vector...");
+    // console.log("Searching Qdrant with query vector...");
 
     const searchResult = await qdrant.search(RESUME_COLLECTION, {
       vector: queryVector,
@@ -221,7 +221,7 @@ export async function searchResumeContent(
       with_payload: true,
     });
 
-    console.log(`Found ${searchResult.length} results in Qdrant`);
+    // console.log(`Found ${searchResult.length} results in Qdrant`);
 
     return searchResult
       .filter((result) => result.payload !== null)
@@ -233,7 +233,7 @@ export async function searchResumeContent(
         score: result.score,
       }));
   } catch (error) {
-    console.error("Error searching resume content:", error);
+    // console.error("Error searching resume content:", error);
     throw new Error(
       `Failed to search resume content: ${
         error instanceof Error ? error.message : "Unknown error"

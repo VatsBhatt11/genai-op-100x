@@ -6,6 +6,10 @@ import { Toaster } from "../components/ui/toaster"
 import { NotificationBell } from "../components/NotificationBell"
 import { NextAuthProvider } from "../components/providers/next-auth-provider"
 import { UploadThingProvider } from "../components/providers/uploadthing-provider"
+import { Navbar } from '@/components/Navbar'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
+import { Session } from 'next-auth'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -14,32 +18,31 @@ export const metadata: Metadata = {
   description: "AI-powered job matching platform",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await getServerSession(authOptions) as Session & {
+    user?: {
+      type?: 'candidate' | 'employer'
+    }
+  }
+  const isAuthenticated = !!session
+  const userType = session?.user?.type || 'candidate'
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="border-b bg-white">
-          <div className="max-w-7xl mx-auto px:4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex items-center">
-                <h1 className="text-xl font-bold">JobMatch AI</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <NotificationBell />
-              </div>
-            </div>
-          </div>
-        </nav>
-        <NextAuthProvider>
-          <UploadThingProvider>
-            {children}
-            <Toaster />
-          </UploadThingProvider>
-        </NextAuthProvider>
+        {isAuthenticated && <Navbar userType={userType} />}
+        <main style={{ paddingTop: isAuthenticated ? '70px' : '0' }}>
+          <NextAuthProvider>
+            <UploadThingProvider>
+              {children}
+              <Toaster />
+            </UploadThingProvider>
+          </NextAuthProvider>
+        </main>
       </body>
     </html>
   )

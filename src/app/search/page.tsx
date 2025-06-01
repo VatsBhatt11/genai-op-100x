@@ -6,6 +6,7 @@ import { CandidateProfileCard } from '@/components/CandidateProfileCard';
 import { OutreachDialog } from '@/components/OutreachDialog';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface SearchResult {
   profile: any;
@@ -24,6 +25,7 @@ export default function SearchPage() {
   const [selectedProfiles, setSelectedProfiles] = useState<string[]>([]);
   const [isOutreachOpen, setIsOutreachOpen] = useState(false);
   const [outreachTarget, setOutreachTarget] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -35,18 +37,19 @@ export default function SearchPage() {
       });
       const data = await response.json();
       setResults(data);
+      setSearchQuery(query);
     } catch (error) {
-      console.error('Search failed:', error);
+      // console.error('Search failed:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleProfileSelect = (profileId: string, selected: boolean) => {
-    setSelectedProfiles(prev =>
-      selected
-        ? [...prev, profileId]
-        : prev.filter(id => id !== profileId)
+  const handleProfileSelect = (id: string) => {
+    setSelectedProfiles(prev => 
+      prev.includes(id) 
+        ? prev.filter(profileId => profileId !== id)
+        : [...prev, id]
     );
   };
 
@@ -60,27 +63,43 @@ export default function SearchPage() {
     setIsOutreachOpen(true);
   };
 
-  const handleSendOutreach = async (message: string, questions: any[]) => {
-    try {
-      const targetIds = outreachTarget
-        ? [outreachTarget]
-        : selectedProfiles;
+  const handleSendOutreach = async (message: string) => {
+    // Determine the target(s)
+    const candidateIds = outreachTarget
+      ? [outreachTarget]
+      : selectedProfiles;
 
-      await fetch('/api/outreach', {
+    if (candidateIds.length === 0) return;
+
+    try {
+      const response = await fetch('/api/outreach/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          profileIds: targetIds,
+          candidateIds,
           message,
-          questions,
+          query: searchQuery || "Looking for candidates",
         }),
       });
 
-      setIsOutreachOpen(false);
-      setOutreachTarget(null);
-      setSelectedProfiles([]);
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Success",
+          description: `Outreach messages sent successfully to ${data.sentCount} candidates`,
+        });
+        setSelectedProfiles([]);
+        setIsOutreachOpen(false);
+        setOutreachTarget(null);
+      } else {
+        throw new Error('Failed to send outreach');
+      }
     } catch (error) {
-      console.error('Outreach failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send outreach messages",
+        variant: "destructive",
+      });
     }
   };
 
@@ -131,6 +150,7 @@ export default function SearchPage() {
         }}
         onSend={handleSendOutreach}
         selectedCount={outreachTarget ? 1 : selectedProfiles.length}
+        searchQuery={searchQuery}
       />
 
       <style jsx>{`

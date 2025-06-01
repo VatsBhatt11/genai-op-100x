@@ -115,7 +115,7 @@ export async function initVectorCollection() {
       });
     }
   } catch (error) {
-    console.error("Failed to initialize vector collection:", error);
+    // console.error("Failed to initialize vector collection:", error);
     throw error;
   }
 }

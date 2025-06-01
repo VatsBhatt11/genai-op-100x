@@ -6,10 +6,10 @@ import {
 
 async function main() {
   try {
-    console.log("Initializing vector collection...");
+    // console.log("Initializing vector collection...");
     await initVectorCollection();
 
-    console.log("Fetching all candidate profiles...");
+    // console.log("Fetching all candidate profiles...");
     const profiles = await prisma.candidateProfile.findMany({
       include: {
         user: {
@@ -20,10 +20,10 @@ async function main() {
       },
     });
 
-    console.log(`Found ${profiles.length} profiles. Starting vectorization...`);
+    // console.log(`Found ${profiles.length} profiles. Starting vectorization...`);
 
     for (const profile of profiles) {
-      console.log(`Processing profile: ${profile.fullName}`);
+      // console.log(`Processing profile: ${profile.fullName}`);
       await upsertCandidateVector(profile.id, {
         fullName: profile.fullName,
         skills: profile.skills,
@@ -33,9 +33,9 @@ async function main() {
       });
     }
 
-    console.log("Vector database initialization complete!");
+    // console.log("Vector database initialization complete!");
   } catch (error) {
-    console.error("Error initializing vector database:", error);
+    // console.error("Error initializing vector database:", error);
     process.exit(1);
   }
 }

@@ -1,12 +1,13 @@
-import { z } from "zod"
+import { z } from "zod";
+import { Groq } from "groq-sdk";
 
 // Define the interface for search filters
 export interface SearchFilters {
-  skills?: string[]
-  experience?: string
-  location?: string
-  employmentType?: string
-  keywords?: string[]
+  skills?: string[];
+  experience?: string;
+  location?: string;
+  employmentType?: string;
+  keywords?: string[];
 }
 
 // Define the Groq API response schema for chat completions
@@ -23,49 +24,62 @@ const groqResponseSchema = z.object({
         content: z.string(),
       }),
       finish_reason: z.string().optional(),
-    }),
+    })
   ),
   usage: z.object({
     prompt_tokens: z.number(),
     completion_tokens: z.number(),
     total_tokens: z.number(),
   }),
-})
+});
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 // Groq API client
-export async function callGroq(messages: any[], temperature = 0.2, model = "llama3-8b-8192") {
+export async function callGroq(
+  messages: any[],
+  temperature = 0.2,
+  model = "llama-3.3-70b-versatile"
+) {
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature,
-        max_tokens: 1024,
-      }),
-    })
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature,
+          max_tokens: 1024,
+        }),
+      }
+    );
 
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Groq API error: ${response.status} - ${errorText}`)
+      const errorText = await response.text();
+      throw new Error(`Groq API error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json()
-    const validatedData = groqResponseSchema.parse(data)
+    const data = await response.json();
+    const validatedData = groqResponseSchema.parse(data);
 
-    return validatedData.choices[0]?.message?.content || ""
+    return validatedData.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error("Error calling Groq API:", error)
-    throw error
+    // console.error("Error calling Groq API:", error);
+    throw error;
   }
 }
 
 // Parse natural language query into structured filters
-export async function parseQueryToFilters(query: string): Promise<SearchFilters> {
+export async function parseQueryToFilters(
+  query: string
+): Promise<SearchFilters> {
   try {
     const prompt = `
 Parse the following natural language job search query into structured JSON filters.
@@ -89,7 +103,7 @@ Return only valid JSON in this exact format:
 }
 
 If a field is not mentioned or unclear, omit it from the response.
-`
+`;
 
     const messages = [
       {
@@ -101,21 +115,21 @@ If a field is not mentioned or unclear, omit it from the response.
         role: "user",
         content: prompt,
       },
-    ]
+    ];
 
-    const content = await callGroq(messages, 0.1)
+    const content = await callGroq(messages, 0.1);
 
     if (!content) {
-      throw new Error("No response from Groq")
+      throw new Error("No response from Groq");
     }
 
     // Parse the JSON response
-    const filters = JSON.parse(content) as SearchFilters
-    return filters
+    const filters = JSON.parse(content) as SearchFilters;
+    return filters;
   } catch (error) {
-    console.error("Error parsing query with Groq:", error)
+    // console.error("Error parsing query with Groq:", error);
     // Fallback to basic keyword extraction
-    return extractBasicFilters(query)
+    return extractBasicFilters(query);
   }
 }
 
@@ -123,7 +137,7 @@ If a field is not mentioned or unclear, omit it from the response.
 export async function generateJobMatchScore(
   candidateProfile: any,
   jobDescription: string,
-  jobSkills: string[],
+  jobSkills: string[]
 ): Promise<{ score: number; reasoning: string }> {
   try {
     const prompt = `
@@ -144,7 +158,7 @@ Respond in this exact JSON format:
   "score": 85,
   "reasoning": "Strong match due to relevant skills and experience level. Missing some specific requirements."
 }
-`
+`;
 
     const messages = [
       {
@@ -156,47 +170,51 @@ Respond in this exact JSON format:
         role: "user",
         content: prompt,
       },
-    ]
+    ];
 
-    const content = await callGroq(messages, 0.3)
+    const content = await callGroq(messages, 0.3);
 
     if (!content) {
-      throw new Error("No response from Groq")
+      throw new Error("No response from Groq");
     }
 
-    return JSON.parse(content)
+    return JSON.parse(content);
   } catch (error) {
-    console.error("Error generating match score:", error)
+    // console.error("Error generating match score:", error);
     return {
       score: 50,
-      reasoning: "Unable to generate detailed analysis. Basic compatibility assessment needed.",
-    }
+      reasoning:
+        "Unable to generate detailed analysis. Basic compatibility assessment needed.",
+    };
   }
 }
 
 // Fallback function for basic filter extraction
 function extractBasicFilters(query: string): SearchFilters {
-  const lowerQuery = query.toLowerCase()
-  const filters: SearchFilters = {}
+  const lowerQuery = query.toLowerCase();
+  const filters: SearchFilters = {};
 
   // Basic experience level detection
   if (lowerQuery.includes("senior") || lowerQuery.includes("sr.")) {
-    filters.experience = "Senior"
+    filters.experience = "Senior";
   } else if (lowerQuery.includes("junior") || lowerQuery.includes("jr.")) {
-    filters.experience = "Junior"
+    filters.experience = "Junior";
   } else if (lowerQuery.includes("mid") || lowerQuery.includes("middle")) {
-    filters.experience = "Mid"
+    filters.experience = "Mid";
   } else if (lowerQuery.includes("lead") || lowerQuery.includes("principal")) {
-    filters.experience = "Lead"
+    filters.experience = "Lead";
   }
 
   // Basic employment type detection
   if (lowerQuery.includes("contract") || lowerQuery.includes("freelance")) {
-    filters.employmentType = "Contract"
-  } else if (lowerQuery.includes("part-time") || lowerQuery.includes("part time")) {
-    filters.employmentType = "Part-time"
+    filters.employmentType = "Contract";
+  } else if (
+    lowerQuery.includes("part-time") ||
+    lowerQuery.includes("part time")
+  ) {
+    filters.employmentType = "Part-time";
   } else if (lowerQuery.includes("remote")) {
-    filters.employmentType = "Remote"
+    filters.employmentType = "Remote";
   }
 
   // Extract potential skills (basic approach)
@@ -234,13 +252,135 @@ function extractBasicFilters(query: string): SearchFilters {
     "llm",
     "machine learning",
     "ai",
-  ]
+  ];
 
-  const foundSkills = commonSkills.filter((skill) => lowerQuery.includes(skill.toLowerCase()))
+  const foundSkills = commonSkills.filter((skill) =>
+    lowerQuery.includes(skill.toLowerCase())
+  );
 
   if (foundSkills.length > 0) {
-    filters.skills = foundSkills
+    filters.skills = foundSkills;
   }
 
-  return filters
+  return filters;
+}
+
+export async function generateJobFromQuery(query: string) {
+  const prompt = `Given the following job search query, extract and structure the job details into a JSON format. Include all relevant information about the role, requirements, and preferences.
+
+Query: "${query}"
+
+Please provide a JSON object with the following structure:
+{
+  "title": "Job title",
+  "description": "Detailed job description",
+  "location": "Job location or 'Remote'",
+  "experience": "Experience level (e.g., 'Entry Level', 'Mid Level', 'Senior Level')",
+  "employmentType": "Employment type (e.g., 'Full-time', 'Part-time', 'Contract')",
+  "isRemote": boolean,
+  "skills": ["Required skill 1", "Required skill 2", ...],
+  "requirements": "Detailed requirements",
+  "benefits": "Job benefits and perks"
+}
+
+IMPORTANT: Respond with ONLY the JSON object, no additional text or explanation.`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a job posting expert that extracts structured information from natural language queries. Always respond with ONLY valid JSON, no additional text.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.3,
+      max_tokens: 1024,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+    if (!response) {
+      throw new Error("No response from Groq");
+    }
+
+    // Clean the response to ensure it's valid JSON
+    const cleanedResponse = response
+      .trim()
+      .replace(/^[^{]*/, "")
+      .replace(/[^}]*$/, "");
+
+    // Parse the JSON response
+    const jobData = JSON.parse(cleanedResponse);
+    return jobData;
+  } catch (error) {
+    // console.error("Error generating job from query:", error);
+    throw error;
+  }
+}
+
+export async function generatePreScreeningQuestions({
+  jobTitle,
+  jobDescription,
+  skills,
+}: {
+  jobTitle: string;
+  jobDescription: string;
+  skills: string[];
+}): Promise<{ question: string; answer: string }[]> {
+  try {
+    const prompt = `
+Generate 5 pre-screening questions for this job posting. Each question should be specific, relevant, and help assess the candidate's fit for the role.
+
+Job Title: ${jobTitle}
+Job Description: ${jobDescription}
+Required Skills: ${skills.join(", ")}
+
+For each question, provide:
+1. A clear, specific question that helps evaluate the candidate's experience or knowledge
+2. A sample answer that demonstrates what a good response would look like
+
+Return the questions and answers in this exact JSON format:
+[
+  {
+    "question": "What is your experience with [specific technology]?",
+    "answer": "I have worked with [technology] for X years, specifically on projects involving..."
+  },
+  ...
+]
+
+Make the questions specific to the role and required skills.`;
+
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are an expert recruiter that creates effective pre-screening questions. Always respond with valid JSON only.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ];
+
+    const content = await callGroq(messages, 0.3);
+
+    if (!content) {
+      throw new Error("No response from Groq");
+    }
+
+    return JSON.parse(content);
+  } catch (error) {
+    // console.error("Error generating pre-screening questions:", error);
+    return [
+      {
+        question: "",
+        answer: "",
+      },
+    ];
+  }
 }

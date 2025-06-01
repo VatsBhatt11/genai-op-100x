@@ -9,7 +9,7 @@ const GetStartedButton = () => {
   }
 
   const handleWatchDemo = () => {
-    console.log("Demo functionality to be implemented")
+    // console.log("Demo functionality to be implemented")
   }
 
   return (

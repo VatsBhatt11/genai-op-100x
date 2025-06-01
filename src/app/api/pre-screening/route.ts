@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       preScreening,
     });
   } catch (error) {
-    console.error("Pre-screening error:", error);
+    // console.error("Pre-screening error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

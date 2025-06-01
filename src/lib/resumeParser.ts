@@ -161,7 +161,7 @@ export class ResumeParser {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Groq API error:", errorData);
+        // console.error("Groq API error:", errorData);
         throw new Error(
           `Groq API error: ${response.status} ${response.statusText}`
         );
@@ -170,21 +170,17 @@ export class ResumeParser {
       const data = await response.json();
 
       if (!data.choices?.[0]?.message?.content) {
-        console.error("Unexpected Groq API response format:", data);
+        // console.error("Unexpected Groq API response format:", data);
         throw new Error("Unexpected response format from Groq API");
       }
 
       try {
         return JSON.parse(data.choices[0].message.content);
       } catch (parseError) {
-        console.error(
-          "Failed to parse JSON from Groq response:",
-          data.choices[0].message.content
-        );
         throw new Error("Invalid JSON response from Groq API");
       }
     } catch (error) {
-      console.error("Error extracting information:", error);
+      // console.error("Error extracting information:", error);
       return this.fallbackExtraction(text);
     }
   }
@@ -267,7 +263,7 @@ export class ResumeParser {
         },
       };
     } catch (error) {
-      console.error("Error parsing resume:", error);
+      // console.error("Error parsing resume:", error);
       // Add more detailed error information
       if (error instanceof Error) {
         throw new Error(`Failed to parse resume: ${error.message}`);

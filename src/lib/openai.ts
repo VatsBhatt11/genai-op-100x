@@ -1,18 +1,20 @@
-import OpenAI from "openai"
+import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 export interface SearchFilters {
-  skills?: string[]
-  experience?: string
-  location?: string
-  employmentType?: string
-  keywords?: string[]
+  skills?: string[];
+  experience?: string;
+  location?: string;
+  employmentType?: string;
+  keywords?: string[];
 }
 
-export async function parseQueryToFilters(query: string): Promise<SearchFilters> {
+export async function parseQueryToFilters(
+  query: string
+): Promise<SearchFilters> {
   try {
     const prompt = `
 Parse the following natural language job search query into structured JSON filters.
@@ -36,7 +38,7 @@ Return only valid JSON in this exact format:
 }
 
 If a field is not mentioned or unclear, omit it from the response.
-`
+`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -53,45 +55,48 @@ If a field is not mentioned or unclear, omit it from the response.
       ],
       temperature: 0.1,
       max_tokens: 500,
-    })
+    });
 
-    const content = response.choices[0]?.message?.content
+    const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error("No response from OpenAI")
+      throw new Error("No response from OpenAI");
     }
 
     // Parse the JSON response
-    const filters = JSON.parse(content) as SearchFilters
-    return filters
+    const filters = JSON.parse(content) as SearchFilters;
+    return filters;
   } catch (error) {
-    console.error("Error parsing query with OpenAI:", error)
+    // console.error("Error parsing query with OpenAI:", error)
     // Fallback to basic keyword extraction
-    return extractBasicFilters(query)
+    return extractBasicFilters(query);
   }
 }
 
 function extractBasicFilters(query: string): SearchFilters {
-  const lowerQuery = query.toLowerCase()
-  const filters: SearchFilters = {}
+  const lowerQuery = query.toLowerCase();
+  const filters: SearchFilters = {};
 
   // Basic experience level detection
   if (lowerQuery.includes("senior") || lowerQuery.includes("sr.")) {
-    filters.experience = "Senior"
+    filters.experience = "Senior";
   } else if (lowerQuery.includes("junior") || lowerQuery.includes("jr.")) {
-    filters.experience = "Junior"
+    filters.experience = "Junior";
   } else if (lowerQuery.includes("mid") || lowerQuery.includes("middle")) {
-    filters.experience = "Mid"
+    filters.experience = "Mid";
   } else if (lowerQuery.includes("lead") || lowerQuery.includes("principal")) {
-    filters.experience = "Lead"
+    filters.experience = "Lead";
   }
 
   // Basic employment type detection
   if (lowerQuery.includes("contract") || lowerQuery.includes("freelance")) {
-    filters.employmentType = "Contract"
-  } else if (lowerQuery.includes("part-time") || lowerQuery.includes("part time")) {
-    filters.employmentType = "Part-time"
+    filters.employmentType = "Contract";
+  } else if (
+    lowerQuery.includes("part-time") ||
+    lowerQuery.includes("part time")
+  ) {
+    filters.employmentType = "Part-time";
   } else if (lowerQuery.includes("remote")) {
-    filters.employmentType = "Remote"
+    filters.employmentType = "Remote";
   }
 
   // Extract potential skills (basic approach)
@@ -129,21 +134,23 @@ function extractBasicFilters(query: string): SearchFilters {
     "llm",
     "machine learning",
     "ai",
-  ]
+  ];
 
-  const foundSkills = commonSkills.filter((skill) => lowerQuery.includes(skill.toLowerCase()))
+  const foundSkills = commonSkills.filter((skill) =>
+    lowerQuery.includes(skill.toLowerCase())
+  );
 
   if (foundSkills.length > 0) {
-    filters.skills = foundSkills
+    filters.skills = foundSkills;
   }
 
-  return filters
+  return filters;
 }
 
 export async function generateJobMatchScore(
   candidateProfile: any,
   jobDescription: string,
-  jobSkills: string[],
+  jobSkills: string[]
 ): Promise<{ score: number; reasoning: string }> {
   try {
     const prompt = `
@@ -164,7 +171,7 @@ Respond in this exact JSON format:
   "score": 85,
   "reasoning": "Strong match due to relevant skills and experience level. Missing some specific requirements."
 }
-`
+`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -181,19 +188,20 @@ Respond in this exact JSON format:
       ],
       temperature: 0.3,
       max_tokens: 300,
-    })
+    });
 
-    const content = response.choices[0]?.message?.content
+    const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error("No response from OpenAI")
+      throw new Error("No response from OpenAI");
     }
 
-    return JSON.parse(content)
+    return JSON.parse(content);
   } catch (error) {
-    console.error("Error generating match score:", error)
+    // console.error("Error generating match score:", error)
     return {
       score: 50,
-      reasoning: "Unable to generate detailed analysis. Basic compatibility assessment needed.",
-    }
+      reasoning:
+        "Unable to generate detailed analysis. Basic compatibility assessment needed.",
+    };
   }
 }

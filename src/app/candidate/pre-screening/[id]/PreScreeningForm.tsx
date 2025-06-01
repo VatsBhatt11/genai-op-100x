@@ -40,7 +40,7 @@ export default function PreScreeningForm({
 
       router.push("/candidate/job-updates");
     } catch (error) {
-      console.error("Error submitting pre-screening:", error);
+      // console.error("Error submitting pre-screening:", error);
       setIsSubmitting(false);
     }
   };

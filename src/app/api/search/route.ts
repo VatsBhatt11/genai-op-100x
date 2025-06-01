@@ -88,7 +88,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error("Search error:", error);
+    // console.error("Search error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

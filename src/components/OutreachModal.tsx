@@ -3,12 +3,12 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/src/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog"
-import { Input } from "@/src/components/ui/input"
-import { Textarea } from "@/src/components/ui/textarea"
-import { Label } from "@/src/components/ui/label"
-import { useToast } from "@/src/hooks/use-toast"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
 import { Send } from "lucide-react"
 
 interface Candidate {
@@ -21,9 +21,10 @@ interface Candidate {
 interface OutreachModalProps {
   candidates: Candidate[]
   trigger?: React.ReactNode
+  searchQuery?: string
 }
 
-export function OutreachModal({ candidates, trigger }: OutreachModalProps) {
+export function OutreachModal({ candidates, trigger, searchQuery }: OutreachModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
@@ -51,6 +52,7 @@ export function OutreachModal({ candidates, trigger }: OutreachModalProps) {
           candidateIds: candidates.map((c) => c.id),
           subject,
           message,
+          query: searchQuery || "Looking for candidates",
         }),
       })
 

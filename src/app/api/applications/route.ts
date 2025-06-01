@@ -1,25 +1,25 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { type NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let applications
+    let applications;
 
     if (session.user.role === "CANDIDATE") {
       const candidateProfile = await prisma.candidateProfile.findUnique({
         where: { userId: session.user.id },
-      })
+      });
 
       if (!candidateProfile) {
-        return NextResponse.json([])
+        return NextResponse.json([]);
       }
 
       applications = await prisma.application.findMany({
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
           },
         },
         orderBy: { createdAt: "desc" },
-      })
+      });
     } else {
       // Company user - get applications for their jobs
       applications = await prisma.application.findMany({
@@ -60,12 +60,15 @@ export async function GET(request: NextRequest) {
           },
         },
         orderBy: { createdAt: "desc" },
-      })
+      });
     }
 
-    return NextResponse.json(applications)
+    return NextResponse.json(applications);
   } catch (error) {
-    console.error("Get applications error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    // console.error("Get applications error:", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

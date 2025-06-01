@@ -22,8 +22,9 @@ interface PreScreeningQuestion {
 interface OutreachDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSend: (message: string, questions: PreScreeningQuestion[]) => Promise<void>;
+  onSend: (message: string) => Promise<void>;
   selectedCount?: number;
+  searchQuery?: string;
   isLoading?: boolean;
 }
 
@@ -32,6 +33,7 @@ export function OutreachDialog({
   onClose,
   onSend,
   selectedCount = 1,
+  searchQuery = '',
   isLoading = false,
 }: OutreachDialogProps) {
   const [message, setMessage] = useState('');
@@ -44,13 +46,20 @@ export function OutreachDialog({
     try {
       const response = await fetch('/api/generate-outreach', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context: 'Generate a professional outreach message' }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          context: `Search query: ${searchQuery}\nNumber of candidates: ${selectedCount}`,
+        }),
       });
-      const data = await response.json();
-      setMessage(data.message);
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessage(data.message);
+      }
     } catch (error) {
-      console.error('Failed to generate message:', error);
+      // console.error('Failed to generate message:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -67,7 +76,7 @@ export function OutreachDialog({
       const data = await response.json();
       setQuestions(data.questions);
     } catch (error) {
-      console.error('Failed to generate questions:', error);
+      // console.error('Failed to generate questions:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -85,9 +94,8 @@ export function OutreachDialog({
   };
 
   const handleSend = async () => {
-    await onSend(message, questions);
-    setMessage('');
-    setQuestions([]);
+    if (!message.trim()) return;
+    await onSend(message);
   };
 
   return (

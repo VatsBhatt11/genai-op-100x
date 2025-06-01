@@ -53,7 +53,7 @@ export async function POST(
 
     return NextResponse.json(submission);
   } catch (error) {
-    console.error("Error submitting pre-screening answers:", error);
+    // console.error("Error submitting pre-screening answers:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

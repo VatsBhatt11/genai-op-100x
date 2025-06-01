@@ -75,6 +75,14 @@ CREATE TABLE "CandidateProfile" (
     "searchVector" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "certifications" TEXT[],
+    "education" JSONB,
+    "githubUrl" TEXT,
+    "languages" TEXT[],
+    "linkedinUrl" TEXT,
+    "phoneNumber" TEXT,
+    "portfolioUrl" TEXT,
+    "workHistory" JSONB,
 
     CONSTRAINT "CandidateProfile_pkey" PRIMARY KEY ("id")
 );
@@ -91,6 +99,7 @@ CREATE TABLE "Job" (
     "isRemote" BOOLEAN NOT NULL DEFAULT false,
     "skills" TEXT[],
     "searchVector" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -152,6 +161,7 @@ CREATE TABLE "Notification" (
     "metadata" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "outreachId" TEXT,
 
     CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );
@@ -161,6 +171,59 @@ CREATE TABLE "VerificationToken" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "CompanyProfile" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "website" TEXT,
+    "location" TEXT,
+    "industry" TEXT,
+    "size" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "logo" TEXT,
+
+    CONSTRAINT "CompanyProfile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PreScreening" (
+    "id" TEXT NOT NULL,
+    "companyId" TEXT NOT NULL,
+    "questions" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PreScreening_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PreScreeningSubmission" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "preScreeningId" TEXT NOT NULL,
+    "candidateId" TEXT NOT NULL,
+    "answers" TEXT[],
+
+    CONSTRAINT "PreScreeningSubmission_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Outreach" (
+    "id" TEXT NOT NULL,
+    "senderId" TEXT NOT NULL,
+    "receiverId" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "preScreeningId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Outreach_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -191,6 +254,9 @@ CREATE INDEX "CandidateProfile_experience_idx" ON "CandidateProfile"("experience
 CREATE INDEX "CandidateProfile_location_idx" ON "CandidateProfile"("location");
 
 -- CreateIndex
+CREATE INDEX "CandidateProfile_employmentType_idx" ON "CandidateProfile"("employmentType");
+
+-- CreateIndex
 CREATE INDEX "Job_companyId_idx" ON "Job"("companyId");
 
 -- CreateIndex
@@ -201,6 +267,9 @@ CREATE INDEX "Job_location_idx" ON "Job"("location");
 
 -- CreateIndex
 CREATE INDEX "Job_createdAt_idx" ON "Job"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "Job_status_idx" ON "Job"("status");
 
 -- CreateIndex
 CREATE INDEX "Application_jobId_idx" ON "Application"("jobId");
@@ -233,6 +302,9 @@ CREATE INDEX "MessageLog_applicationId_idx" ON "MessageLog"("applicationId");
 CREATE INDEX "MessageLog_status_idx" ON "MessageLog"("status");
 
 -- CreateIndex
+CREATE INDEX "Notification_senderId_idx" ON "Notification"("senderId");
+
+-- CreateIndex
 CREATE INDEX "Notification_receiverId_idx" ON "Notification"("receiverId");
 
 -- CreateIndex
@@ -247,6 +319,30 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "CompanyProfile_userId_key" ON "CompanyProfile"("userId");
+
+-- CreateIndex
+CREATE INDEX "CompanyProfile_userId_idx" ON "CompanyProfile"("userId");
+
+-- CreateIndex
+CREATE INDEX "PreScreening_companyId_idx" ON "PreScreening"("companyId");
+
+-- CreateIndex
+CREATE INDEX "PreScreeningSubmission_preScreeningId_idx" ON "PreScreeningSubmission"("preScreeningId");
+
+-- CreateIndex
+CREATE INDEX "PreScreeningSubmission_candidateId_idx" ON "PreScreeningSubmission"("candidateId");
+
+-- CreateIndex
+CREATE INDEX "Outreach_senderId_idx" ON "Outreach"("senderId");
+
+-- CreateIndex
+CREATE INDEX "Outreach_receiverId_idx" ON "Outreach"("receiverId");
+
+-- CreateIndex
+CREATE INDEX "Outreach_preScreeningId_idx" ON "Outreach"("preScreeningId");
+
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -260,10 +356,10 @@ ALTER TABLE "CandidateProfile" ADD CONSTRAINT "CandidateProfile_userId_fkey" FOR
 ALTER TABLE "Job" ADD CONSTRAINT "Job_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "Job"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Application" ADD CONSTRAINT "Application_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "CandidateProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "CandidateProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Application" ADD CONSTRAINT "Application_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "Job"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -278,7 +374,28 @@ ALTER TABLE "MessageLog" ADD CONSTRAINT "MessageLog_applicationId_fkey" FOREIGN 
 ALTER TABLE "MessageLog" ADD CONSTRAINT "MessageLog_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Notification" ADD CONSTRAINT "Notification_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CompanyProfile" ADD CONSTRAINT "CompanyProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PreScreening" ADD CONSTRAINT "PreScreening_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PreScreeningSubmission" ADD CONSTRAINT "PreScreeningSubmission_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PreScreeningSubmission" ADD CONSTRAINT "PreScreeningSubmission_preScreeningId_fkey" FOREIGN KEY ("preScreeningId") REFERENCES "PreScreening"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Outreach" ADD CONSTRAINT "Outreach_preScreeningId_fkey" FOREIGN KEY ("preScreeningId") REFERENCES "PreScreening"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Outreach" ADD CONSTRAINT "Outreach_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Outreach" ADD CONSTRAINT "Outreach_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

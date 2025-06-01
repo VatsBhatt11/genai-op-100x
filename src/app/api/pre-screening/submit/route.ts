@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       submission,
     });
   } catch (error) {
-    console.error("Pre-screening submission error:", error);
+    // console.error("Pre-screening submission error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

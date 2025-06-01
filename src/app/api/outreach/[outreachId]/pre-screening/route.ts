@@ -53,7 +53,7 @@ export async function GET(
       hasSubmitted: outreach.preScreening.submissions.length > 0,
     });
   } catch (error) {
-    console.error("Error fetching pre-screening questions:", error);
+    // console.error("Error fetching pre-screening questions:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

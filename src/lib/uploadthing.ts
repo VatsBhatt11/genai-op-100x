@@ -23,13 +23,13 @@ export const ourFileRouter = {
         }
         return { userId: session.user.id };
       } catch (error) {
-        console.error("Middleware error:", error);
+        // console.error("Middleware error:", error);
         throw new Error("Authentication failed");
       }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Upload complete for userId:", metadata.userId);
-      console.log("File URL:", file.url);
+      // console.log("Upload complete for userId:", metadata.userId);
+      // console.log("File URL:", file.url);
     }),
 } satisfies FileRouter;
 

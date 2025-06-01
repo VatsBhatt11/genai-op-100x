@@ -28,7 +28,7 @@ export async function PATCH(
       notification: updatedNotification,
     });
   } catch (error) {
-    console.error("Notification update error:", error);
+    // console.error("Notification update error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
