@@ -7,7 +7,7 @@
     "build": "prisma generate --no-engine && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate --no-engine && npm install --platform=darwin --arch=x64 sharp@0.32.6",
+    "postinstall": "prisma generate --no-engine && npm install --platform=linux --arch=x64 sharp@0.32.6",
     "prisma": "prisma generate && prisma migrate dev"
   },
   "dependencies": {
