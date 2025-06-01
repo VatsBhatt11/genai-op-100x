@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
+import { UserRole, Prisma } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
@@ -55,10 +55,38 @@ export async function POST(req: Request) {
       { message: "User created successfully" },
       { status: 201 }
     );
-  } catch (error) {
-    // console.error("Signup error:", error);
+  } catch (error: unknown) {
+    console.error("Signup error:", error);
+
+    // Handle specific Prisma errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return NextResponse.json(
+          { message: "A user with this email already exists" },
+          { status: 400 }
+        );
+      }
+
+      if (error.code === "P2025") {
+        return NextResponse.json(
+          { message: "Database operation failed" },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Handle validation errors
+    if (error instanceof Error) {
+      if (error.name === "ValidationError") {
+        return NextResponse.json({ message: error.message }, { status: 400 });
+      }
+    }
+
     return NextResponse.json(
-      { message: "Something went wrong" },
+      {
+        message: "Something went wrong",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
