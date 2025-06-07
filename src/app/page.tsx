@@ -30,7 +30,7 @@ export default function HomePage() {
       <div className="features-section">
         <div className="feature-card">
           <div className="feature-icon">🔍</div>
-          <h3 className="feature-title">Natural Language Search</h3>
+          <h3 className="feature-title">Easy Search</h3>
           <p className="feature-description">
             Simply describe your ideal candidate in plain English. Our AI understands complex requirements and finds the perfect match.
           </p>
