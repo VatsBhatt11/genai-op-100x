@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate --no-engine && next build",
+    "preinstall": "npm install --platform=darwin --arch=x64 sharp",
+    "build": "npm install --platform=darwin --arch=x64 sharp && prisma generate --no-engine && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate --no-engine",
@@ -74,7 +75,7 @@
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
-    "sharp": "latest",
+    "sharp": "^0.34.2",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
