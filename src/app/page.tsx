@@ -38,7 +38,7 @@ export default function HomePage() {
 
         <div className="feature-card">
           <div className="feature-icon">⚡</div>
-          <h3 className="feature-title">60-Day to 60-Minute</h3>
+          <h3 className="feature-title">60-Days to 60-Minutes</h3>
           <p className="feature-description">
             Reduce time-to-hire from months to minutes. Our AI instantly ranks and screens candidates, eliminating manual processes.
           </p>
