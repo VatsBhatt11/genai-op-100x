@@ -18,7 +18,7 @@ export default async function ApplyPage({
   };
 
   if (!session?.user || session.user.role !== "CANDIDATE") {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   // Get job details

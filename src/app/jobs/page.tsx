@@ -14,7 +14,7 @@ export default async function JobsPage() {
   };
 
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   // Get jobs where the candidate has received outreach

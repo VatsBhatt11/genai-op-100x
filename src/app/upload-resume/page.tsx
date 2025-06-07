@@ -14,7 +14,7 @@ export default async function UploadResumePage() {
   };
 
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   const user = await prisma.user.findUnique({

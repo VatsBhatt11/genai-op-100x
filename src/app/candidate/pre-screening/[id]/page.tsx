@@ -14,7 +14,7 @@ export default async function PreScreeningPage({
     user: { id: string };
   };
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   const preScreening = await prisma.preScreening.findUnique({
