@@ -67,11 +67,11 @@ export default async function DashboardPage() {
         <div className="dashboard-card">
           <h3 className="dashboard-card-title">Applications</h3>
           <div className="dashboard-stats">
-            <div>
+            <div >
               <div className="dashboard-stat-number">{totalApplied}</div>
               <div className="dashboard-stat-label">Total Applied</div>
             </div>
-            <div>
+            <div >
               <div className="dashboard-stat-number">{inReview}</div>
               <div className="dashboard-stat-label">In Review</div>
             </div>
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
 
         <div className="dashboard-card">
           <h3 className="dashboard-card-title">Recent Activity</h3>
-          <div style={{ color: "var(--text-secondary)", fontSize: "var(--fs-sm)" }}>
+          <div style={{ color: "#6366f1", fontSize: "var(--fs-md)" }}>
             <p>• Received {outreachCount} outreach messages</p>
             <p>• Applied to {totalApplied} positions</p>
             <p>• {inReview} applications in review</p>

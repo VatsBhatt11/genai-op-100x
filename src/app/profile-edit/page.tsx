@@ -181,7 +181,7 @@ export default function ProfileEdit() {
 
       if (response.ok) {
         toast.success("Profile updated successfully")
-        router.push("/profile")
+        router.push("/dashboard")
       } else {
         const error = await response.json()
         toast.error(error.message || "Failed to update profile")

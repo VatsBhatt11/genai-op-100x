@@ -129,7 +129,7 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
 
         .candidate-card:hover {
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-          border-color: #4caf50;
+          border-color: #6366f1;
           transform: translateY(-4px);
         }
 
@@ -155,7 +155,7 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
           width: 3.5rem;
           height: 3.5rem;
           border-radius: 1rem;
-          background: linear-gradient(135deg, #4caf50, #43a047);
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
           color: white;
           display: flex;
           align-items: center;
@@ -187,7 +187,7 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
           display: flex;
           align-items: center;
           gap: 0.375rem;
-          background: linear-gradient(135deg, #4caf50, #43a047);
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
           color: white;
           padding: 0.375rem 0.75rem;
           border-radius: 9999px;
@@ -234,7 +234,7 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
 
         .skill-tag {
           background: #f1f5f9;
-          color: #4caf50;
+          color: #6366f1;
           padding: 0.375rem 0.75rem;
           border-radius: 9999px;
           font-size: 0.875rem;
@@ -246,10 +246,10 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
         }
 
         .skill-tag:hover {
-          background: #4caf50;
+          background: #6366f1;
           color: white;
           transform: translateY(-2px);
-          border-color: #4caf50;
+          border-color: #6366f1;
         }
 
         .more-skills {
@@ -301,7 +301,7 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
         .contact-icon {
           width: 1rem;
           height: 1rem;
-          color: #4caf50;
+          color: #6366f1;
         }
 
         .selection-indicator {
@@ -323,8 +323,8 @@ export function CandidateProfileCard({ profile, matchScore, matchDetails, onSele
         }
 
         .selection-indicator.selected {
-          background: #4caf50;
-          border-color: #4caf50;
+          background: #6366f1;
+          border-color: #6366f1;
           color: white;
           transform: scale(1.1);
         }

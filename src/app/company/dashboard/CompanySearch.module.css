@@ -26,7 +26,7 @@
   content: "";
   width: 4px;
   height: 24px;
-  background: #4caf50;
+  background: #6366f1;
   border-radius: 2px;
 }
 
@@ -65,7 +65,7 @@
 }
 
 .searchInputWrapper:focus-within .searchIcon {
-  color: #4caf50;
+  color: #6366f1;
 }
 
 .searchInput {
@@ -80,7 +80,7 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #6366f1;
 }
 
 .clearButton {
@@ -107,7 +107,7 @@
 
 .searchButton {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #4caf50, #43a047);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   border: none;
   border-radius: 1rem;
@@ -167,7 +167,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: #4caf50;
+  background: #6366f1;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -204,7 +204,7 @@
 
 .statusCompleted {
   background: #e8f5e9;
-  color: #4caf50;
+  color: #6366f1;
 }
 
 .outreachDetails {
@@ -222,7 +222,7 @@
 }
 
 .detailIcon {
-  color: #4caf50;
+  color: #6366f1;
   font-size: 1.1rem;
 }
 
@@ -246,7 +246,7 @@
 }
 
 .primaryButton {
-  background: #4caf50;
+  background: #6366f1;
   color: white;
 }
 
@@ -291,7 +291,7 @@
   content: "";
   width: 3px;
   height: 20px;
-  background: #4caf50;
+  background: #6366f1;
   border-radius: 2px;
 }
 
@@ -310,7 +310,7 @@
 
 .questionInput:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
@@ -332,7 +332,7 @@
 }
 
 .saveQuestionsButton {
-  background: #4caf50;
+  background: #6366f1;
   color: white;
 }
 
@@ -353,7 +353,7 @@
 
 .outreachTextarea:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
@@ -373,7 +373,7 @@
 }
 
 .whatsappIcon {
-  color: #4caf50;
+  color: #6366f1;
   width: 1.1rem;
   height: 1.1rem;
 }
@@ -382,7 +382,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #4caf50;
+  background: #6366f1;
   color: white;
 }
 
@@ -474,7 +474,7 @@
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #4caf50;
+  color: #6366f1;
   border: 3px solid white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -512,7 +512,7 @@
   gap: 0.5rem;
   padding: 0.25rem 0.75rem;
   background: #f0fdf4;
-  color: #4caf50;
+  color: #6366f1;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -547,7 +547,7 @@
 .skillTag {
   padding: 0.25rem 0.75rem;
   background: #f1f5f9;
-  color: #4caf50;
+  color: #6366f1;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -555,7 +555,7 @@
 }
 
 .skillTag:hover {
-  background: #4caf50;
+  background: #6366f1;
   color: white;
   transform: translateY(-2px);
 }
@@ -583,7 +583,7 @@
 }
 
 .experienceIcon {
-  color: #4caf50;
+  color: #6366f1;
   width: 1.1rem;
   height: 1.1rem;
 }
@@ -603,12 +603,12 @@
 
 .prescreeningToggle:hover {
   background: #f1f5f9;
-  border-color: #4caf50;
-  color: #4caf50;
+  border-color: #6366f1;
+  color: #6366f1;
 }
 
 .sendButton {
-  background: linear-gradient(135deg, #4caf50, #43a047);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 12px;

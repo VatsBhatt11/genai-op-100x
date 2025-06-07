@@ -73,7 +73,8 @@ body {
   font-size: var(--fs-base);
   line-height: var(--lh-body);
   color: var(--text-primary);
-  background-color: var(--bg-default);
+  /* background-color: var(--bg-default); */
+  /* background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
