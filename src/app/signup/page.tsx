@@ -36,12 +36,12 @@ export default function SignUpPage() {
 
       toast.success("Account created successfully!")
       
-      // If user is a candidate, redirect to resume upload
-      if (formData.role === UserRole.CANDIDATE) {
-        router.push("/upload-resume")
-      } else {
-        router.push("/dashboard")
-      }
+      router.push("/login")
+      // if (formData.role === UserRole.CANDIDATE) {
+      //   router.push("/upload-resume")
+      // } else {
+      //   router.push("/dashboard")
+      // }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong")
     } finally {
