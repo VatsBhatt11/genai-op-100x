@@ -16,7 +16,7 @@ export default async function OutreachPage({
     user: { id: string };
   };
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   const outreach = await prisma.outreach.findUnique({

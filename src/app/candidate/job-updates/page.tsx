@@ -10,7 +10,7 @@ export default async function JobUpdatesPage() {
     user: { id: string };
   };
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   const outreachMessages = await prisma.outreach.findMany({
