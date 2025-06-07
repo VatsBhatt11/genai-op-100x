@@ -7,7 +7,7 @@ export default function HomePage() {
   const router = useRouter()
 
   return (
-    <div className="bg-black home-container">
+    <div className="home-container">
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">
