@@ -265,7 +265,7 @@ export default function UploadResumeClient({ user }: UploadResumeClientProps) {
         :global(.upload-button) {
           width: 100%;
           height: 100%;
-          opacity: 1;
+          opacity: 0;
           cursor: pointer;
           position: absolute;
           top: 50%;

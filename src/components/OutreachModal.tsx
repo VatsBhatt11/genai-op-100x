@@ -22,9 +22,10 @@ interface OutreachModalProps {
   candidates: Candidate[]
   trigger?: React.ReactNode
   searchQuery?: string
+  jobId?: string // Add jobId here
 }
 
-export function OutreachModal({ candidates, trigger, searchQuery }: OutreachModalProps) {
+export function OutreachModal({ candidates, trigger, searchQuery, jobId }: OutreachModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
@@ -32,6 +33,7 @@ export function OutreachModal({ candidates, trigger, searchQuery }: OutreachModa
   const { toast } = useToast()
 
   const handleSend = async () => {
+    console.log('entered')
     if (!subject.trim() || !message.trim()) {
       toast({
         title: "Error",
@@ -42,31 +44,54 @@ export function OutreachModal({ candidates, trigger, searchQuery }: OutreachModa
     }
 
     setIsLoading(true)
+    console.log("Candidates being sent:", candidates); // Add this line
     try {
-      const response = await fetch("/api/outreach/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          candidateIds: candidates.map((c) => c.id),
-          subject,
-          message,
-          query: searchQuery || "Looking for candidates",
-        }),
-      })
+      const results = await Promise.allSettled(
+        candidates.map(async (candidate) => {
+          const response = await fetch("/api/outreach/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              candidateId: candidate.id, // Add candidateId for backend schema
+              subject,
+              message,
+              query: searchQuery || "Looking for candidates",
+              jobId, // Pass jobId to the API call
+            }),
+          });
 
-      if (response.ok) {
-        const data = await response.json()
+          if (!response.ok) {
+            throw new Error(`Failed to send message to ${candidate.fullName || candidate.email}`);
+          }
+          return response.json();
+        })
+      );
+
+      const successfulSends = results.filter(result => result.status === 'fulfilled').length;
+      const failedSends = results.filter(result => result.status === 'rejected').length;
+
+      if (successfulSends > 0) {
         toast({
           title: "Success",
-          description: `Message sent to ${data.sentCount} candidate(s)`,
-        })
-        setIsOpen(false)
-        setSubject("")
-        setMessage("")
-      } else {
-        throw new Error("Failed to send message")
+          description: `Message sent to ${successfulSends} candidate(s)`,
+        });
+      }
+
+      if (failedSends > 0) {
+        toast({
+          title: "Warning",
+          description: `Failed to send message to ${failedSends} candidate(s). Check console for details.`, // Or provide more specific error messages
+          variant: "destructive",
+        });
+        results.filter(result => result.status === 'rejected').forEach(result => console.error(result.reason));
+      }
+
+      if (successfulSends > 0) {
+        setIsOpen(false);
+        setSubject("");
+        setMessage("");
       }
     } catch (error) {
       toast({

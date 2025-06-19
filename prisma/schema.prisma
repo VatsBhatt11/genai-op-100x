@@ -55,6 +55,7 @@ model User {
   sentOutreach            Outreach[]               @relation("SenderOutreach")
   preScreenings           PreScreening[]           @relation("CompanyPreScreenings")
   preScreeningSubmissions PreScreeningSubmission[]
+
   sessions                Session[]
 
   @@index([email])
@@ -109,6 +110,9 @@ model Job {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   applications   Application[]
+  outreach       Outreach[]
+  preScreeningId String?
+  preScreening   PreScreening? @relation("JobPreScreenings", fields: [preScreeningId], references: [id])
   company        User          @relation("CompanyJobs", fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId])
@@ -132,6 +136,9 @@ model Application {
   job                 Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
   user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   messageLogs         MessageLog[]
+  outreach            Outreach[]
+  interviewReport     InterviewReport? // Link to the interview report
+  score               Float? // Score from the interview
 
   @@unique([jobId, candidateId])
   @@index([jobId])
@@ -173,24 +180,37 @@ model MessageLog {
 }
 
 model Notification {
-  id         String           @id @default(cuid())
+  id         String   @id @default(cuid())
   senderId   String
   receiverId String
-  type       NotificationType
   title      String
   content    String
-  isRead     Boolean          @default(false)
+  isRead     Boolean  @default(false)
   metadata   Json?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   outreachId String?
-  receiver   User             @relation("NotificationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  sender     User             @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("NotificationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])
   @@index([isRead])
   @@index([createdAt])
+}
+
+model InterviewReport {
+  id                  String      @id @default(cuid())
+  applicationId       String      @unique
+  score               Float
+  summary             String
+  strengths           String[]
+  areasForImprovement String[]
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  application         Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
 }
 
 model VerificationToken {
@@ -221,12 +241,13 @@ model CompanyProfile {
 model PreScreening {
   id          String                   @id @default(cuid())
   companyId   String
-  questions   String[]
+  questions String[]
   createdAt   DateTime                 @default(now())
   updatedAt   DateTime                 @updatedAt
-  Outreach    Outreach[]
   company     User                     @relation("CompanyPreScreenings", fields: [companyId], references: [id], onDelete: Cascade)
   submissions PreScreeningSubmission[]
+  jobs      Job[]    @relation("JobPreScreenings")
+  
 
   @@index([companyId])
 }
@@ -246,20 +267,22 @@ model PreScreeningSubmission {
 }
 
 model Outreach {
-  id             String        @id @default(cuid())
-  senderId       String
-  receiverId     String
-  message        String
-  preScreeningId String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  preScreening   PreScreening? @relation(fields: [preScreeningId], references: [id])
-  receiver       User          @relation("ReceiverOutreach", fields: [receiverId], references: [id], onDelete: Cascade)
-  sender         User          @relation("SenderOutreach", fields: [senderId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  senderId      String
+  receiverId    String
+  jobId         String?
+  message       String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sender        User           @relation("SenderOutreach", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver      User           @relation("ReceiverOutreach", fields: [receiverId], references: [id], onDelete: Cascade)
+  job           Job?           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  application   Application?   @relation(fields: [applicationId], references: [id])
+  applicationId String?
 
   @@index([senderId])
   @@index([receiverId])
-  @@index([preScreeningId])
+  @@index([jobId])
 }
 
 enum UserRole {
@@ -272,6 +295,7 @@ enum ApplicationStatus {
   REVIEWED
   ACCEPTED
   REJECTED
+  INTERVIEW_COMPLETED
 }
 
 enum MessageChannel {
@@ -294,11 +318,4 @@ enum TemplateType {
   REJECTION
   INTERVIEW
   CONGRATS
-}
-
-enum NotificationType {
-  MESSAGE
-  APPLICATION_UPDATE
-  JOB_MATCH
-  INTERVIEW_INVITE
 }

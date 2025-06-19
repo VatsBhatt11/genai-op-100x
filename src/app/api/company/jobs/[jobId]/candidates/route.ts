@@ -58,6 +58,7 @@ export async function GET(
           },
           take: 1,
         },
+        interviewReport: true,
       },
     });
 
@@ -65,6 +66,7 @@ export async function GET(
     const outreachMessages = await prisma.outreach.findMany({
       where: {
         senderId: session.user.id,
+        jobId: params.jobId, // Filter by jobId
       },
       include: {
         receiver: {
@@ -72,7 +74,6 @@ export async function GET(
             candidateProfile: true,
           },
         },
-        preScreening: true,
       },
     });
 
@@ -88,6 +89,7 @@ export async function GET(
     applications.forEach((app) => {
       candidateMap.set(app.candidateId, {
         id: app.candidateId,
+        applicationId: app.id,
         fullName: app.candidate.user.candidateProfile?.fullName || "Anonymous",
         skills: app.candidate.user.candidateProfile?.skills || [],
         experience:
@@ -100,6 +102,7 @@ export async function GET(
         feedbackSuggestions: app.feedbackSuggestions,
         lastMessage: app.messageLogs[0]?.content || null,
         lastMessageDate: app.messageLogs[0]?.createdAt || null,
+        interviewScore: app.interviewReport?.score || null,
       });
     });
 

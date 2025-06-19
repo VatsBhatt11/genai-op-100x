@@ -86,7 +86,7 @@ export default function CompanyDashboardPage() {
               <div className="loading">Loading recent jobs...</div>
             ) : (
               <div className="jobs-list">
-                {recentJobs.map((job) => (
+                {recentJobs?.map((job) => (
                   <div key={job.id} className="job-item">
                     <div className="job-info">
                       <h3 className="job-title">{job.title}</h3>

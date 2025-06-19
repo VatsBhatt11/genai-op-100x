@@ -22,10 +22,11 @@ interface PreScreeningQuestion {
 interface OutreachDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSend: (message: string) => Promise<void>;
+  onSend: (message: string, jobId?: string) => Promise<void>;
   selectedCount?: number;
   searchQuery?: string;
   isLoading?: boolean;
+  jobId?: string;
 }
 
 export function OutreachDialog({
@@ -35,6 +36,7 @@ export function OutreachDialog({
   selectedCount = 1,
   searchQuery = '',
   isLoading = false,
+  jobId,
 }: OutreachDialogProps) {
   const [message, setMessage] = useState('');
   const [questions, setQuestions] = useState<PreScreeningQuestion[]>([]);
@@ -95,7 +97,7 @@ export function OutreachDialog({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    await onSend(message);
+    await onSend(message, jobId);
   };
 
   return (
@@ -352,4 +354,4 @@ export function OutreachDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

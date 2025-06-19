@@ -22,9 +22,10 @@ export default async function ApplyPage({
   }
 
   // Get job details
+  const { jobId } = await params;
   const job = await prisma.job.findUnique({
     where: {
-      id: params.jobId,
+      id: jobId,
     },
     include: {
       company: {
@@ -75,4 +76,4 @@ export default async function ApplyPage({
       companyName={job.company.companyProfile?.name || "Unknown Company"}
     />
   );
-} 
+}

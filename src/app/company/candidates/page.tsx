@@ -91,6 +91,7 @@ export default function CompanyCandidatesPage() {
               <OutreachModal
                 candidates={selectedCandidateData}
                 searchQuery={searchTerm}
+                jobId={null}
                 trigger={
                   <Button>
                     <Send className="w-4 h-4 mr-2" />
@@ -201,8 +202,9 @@ export default function CompanyCandidatesPage() {
                             fullName: candidate.fullName || "Unknown",
                             email: candidate.user.email,
                             skills: candidate.skills || [],
-                          },
+                          }
                         ]}
+                        jobId={null}
                         searchQuery={searchTerm}
                         trigger={
                           <Button variant="outline" size="sm">

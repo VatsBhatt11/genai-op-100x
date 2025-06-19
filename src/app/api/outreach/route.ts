@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { profileIds, message } = await req.json();
+    const { profileIds, message, jobId } = await req.json();
 
     if (!Array.isArray(profileIds) || profileIds.length === 0 || !message) {
       return new NextResponse("Invalid request", { status: 400 });
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
             senderId: session.user.id,
             receiverId: candidateProfile.userId,
             message: message,
+            jobId: jobId || null,
           },
         });
 

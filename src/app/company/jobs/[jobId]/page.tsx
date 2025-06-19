@@ -1,20 +1,9 @@
 "use client"
 import { useRouter, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Loader2, Trash2, Edit, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Loader2, Trash2, Edit, ArrowLeft, Send } from "lucide-react"
+import { OutreachModal } from "@/components/OutreachModal"
 import { toast } from "@/components/ui/use-toast"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
 interface Job {
   id: string
@@ -41,6 +30,8 @@ interface Candidate {
   experience: string
   location: string
   hasApplied: boolean
+  interviewScore?: number | null
+  applicationId: string
 }
 
 export default function CompanyJobDetailsPage() {
@@ -173,14 +164,13 @@ export default function CompanyJobDetailsPage() {
     <div className="job-details-page">
       <div className="page-container">
         <header className="page-header">
-          <Button
-            variant="ghost"
+          <button
             className="back-btn"
             onClick={() => router.push("/company/jobs")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Jobs
-          </Button>
+          </button>
           <div className="job-info">
             <h1 className="job-title">{job.title}</h1>
             <div className="job-meta">
@@ -253,8 +243,18 @@ export default function CompanyJobDetailsPage() {
                 <div className="candidates-list">
                   {candidates.map((candidate) => (
                     <div key={candidate.id} className="candidate-card">
+                      
                       <div className="candidate-info">
+                        <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+                          <div>
                         <h3>{candidate.fullName}</h3>
+                        </div>
+                         <div className="candidate-status">
+                        <span className={`status-badge ${candidate.hasApplied ? 'applied' : 'pending'}`}>
+                          {candidate.hasApplied ? 'Applied' : 'Pending'}
+                        </span>
+                      </div>
+                      </div>
                         <div className="candidate-meta">
                           <span>📍 {candidate.location}</span>
                           <span>👨‍💻 {candidate.experience}</span>
@@ -267,11 +267,32 @@ export default function CompanyJobDetailsPage() {
                           ))}
                         </div>
                       </div>
-                      <div className="candidate-status">
-                        <span className={`status-badge ${candidate.hasApplied ? 'applied' : 'pending'}`}>
-                          {candidate.hasApplied ? 'Applied' : 'Pending'}
-                        </span>
-                      </div>
+                      <div className="candidate-actions">
+                    {candidate.interviewScore !== null && candidate.interviewScore !== undefined ? (
+                      <span className="interview-score">Score: {candidate.interviewScore}/100</span>
+                    ) : (
+                      <button className="candidate-action-button" onClick={() => router.push(`/company/jobs/${jobId}/interview/${candidate.id}`)}>
+                         Generate Interview Report
+                       </button>
+                    )}
+                    <OutreachModal
+                      candidates={[
+                        {
+                          id: candidate.id,
+                          fullName: candidate.fullName,
+                          email: "", // Email is not available in this context, will be fetched by API
+                          skills: candidate.skills,
+                        },
+                      ]}
+                      jobId={jobId}
+                      trigger={
+                        <button className="send-outreach-button">
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Outreach
+                        </button>
+                      }
+                    />
+                  </div>
                     </div>
                   ))}
                 </div>
@@ -288,252 +309,421 @@ export default function CompanyJobDetailsPage() {
       <style jsx>{`
         .job-details-page {
           min-height: 100vh;
-          background: #f8fafc;
-          padding: 2rem 1rem;
+          background: linear-gradient(to bottom right, #e0eafc, #cfdef3);
+          padding: 2.5rem 1.5rem;
+          font-family: 'Inter', sans-serif;
         }
 
         .page-container {
-          max-width: 1200px;
+          max-width: 1300px;
           margin: 0 auto;
+          padding: 0 1rem;
         }
 
         .page-header {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          margin-bottom: 2rem;
+          background: linear-gradient(145deg, #ffffff, #f0f2f5);
+          padding: 2rem;
+          border-radius: 16px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+          margin-bottom: 2.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          position: relative;
+          overflow: hidden;
         }
 
         .back-btn {
           margin-bottom: 1rem;
+          align-self: flex-start;
+          color: #555;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+          color: #007bff;
+          transform: translateX(-5px);
         }
 
         .job-info {
           margin-bottom: 1rem;
+          flex-grow: 1;
         }
 
         .job-title {
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: #1a202c;
-          margin-bottom: 0.5rem;
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: #2c3e50;
+          margin-bottom: 0.75rem;
+          line-height: 1.2;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .job-meta {
           display: flex;
           flex-wrap: wrap;
-          gap: 1rem;
+          gap: 1.5rem;
           align-items: center;
-          font-size: 0.875rem;
-          color: #4a5568;
-        }
-
-        .status-badge {
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.75rem;
+          font-size: 0.95rem;
+          color: #555;
           font-weight: 500;
         }
 
+        .status-badge {
+          padding: 0.3rem 0.8rem;
+          border-radius: 25px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        }
+
         .status-badge.active {
-          background: #dcfce7;
-          color: #166534;
+          background: linear-gradient(45deg, #a5d6a7, #66bb6a);
+          color: #1b5e20;
+          border: 1px solid #4caf50;
         }
 
         .status-badge.applied {
-          background: #dcfce7;
-          color: #166534;
+          background: linear-gradient(45deg, #a5d6a7, #66bb6a);
+          color: #1b5e20;
+          border: 1px solid #4caf50;
         }
 
         .status-badge.pending {
-          background: #fef3c7;
-          color: #92400e;
+          background: linear-gradient(45deg, #ffcc80, #ffa726);
+          color: #8d4000;
+          border: 1px solid #ff9800;
         }
 
         .job-actions {
           display: flex;
-          gap: 1rem;
+          gap: 1.2rem;
+          align-items: center;
+          margin-top: 1rem;
         }
 
         .btn-primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: linear-gradient(45deg, #007bff, #0056b3);
           color: white;
           border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
+          padding: 0.8rem 1.8rem;
+          border-radius: 10px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s ease-in-out;
+          box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
         }
 
         .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          transform: translateY(-3px);
+          box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
 
         .content-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 2rem;
+          gap: 2.5rem;
         }
 
         .job-content {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          background: linear-gradient(145deg, #ffffff, #f0f2f5);
+          padding: 2rem;
+          border-radius: 16px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
         .content-section {
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .content-section:last-child {
+          margin-bottom: 0;
+          border-bottom: none;
+          padding-bottom: 0;
         }
 
         .content-section h2 {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: #1a202c;
-          margin-bottom: 1rem;
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 1.2rem;
+          position: relative;
+          padding-left: 15px;
+        }
+
+        .content-section h2::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6px;
+          height: 80%;
+          background: linear-gradient(180deg, #007bff, #0056b3);
+          border-radius: 3px;
         }
 
         .section-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1rem;
+          margin-bottom: 1.5rem;
+          flex-wrap: wrap;
+          gap: 1rem;
         }
 
         .skills-list {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
 
         .skill-tag {
-          background: #e2e8f0;
-          color: #4a5568;
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.875rem;
+          background: #e9ecef;
+          color: #495057;
+          padding: 0.3rem 0.8rem;
+          border-radius: 25px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          border: 1px solid #dee2e6;
         }
 
         .questions-list {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.2rem;
         }
 
         .question-card {
-          background: #f7fafc;
-          padding: 1rem;
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
+          background: #ffffff;
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 1px solid #e9ecef;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+          transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
 
         .question-card h3 {
-          font-size: 1rem;
+          font-size: 1.1rem;
           font-weight: 600;
-          color: #1a202c;
-          margin-bottom: 0.5rem;
+          color: #34495e;
+          margin-bottom: 0.75rem;
         }
 
         .question {
-          color: #4a5568;
-          margin-bottom: 0.5rem;
+          color: #555;
+          margin-bottom: 0.75rem;
+          line-height: 1.6;
         }
 
         .answer {
-          color: #718096;
-          font-size: 0.875rem;
+          color: #777;
+          font-size: 0.9rem;
+          font-style: italic;
+          border-left: 3px solid #007bff;
+          padding-left: 10px;
+          margin-top: 1rem;
         }
 
         .candidates-list {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.5rem;
         }
 
         .candidate-card {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem;
-          background: #f7fafc;
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 1.5rem;
+          background: #ffffff;
+          border-radius: 12px;
+          border: 1px solid #e9ecef;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+          transition: all 0.3s ease;
+        }
+
+        .candidate-actions {
+          display: flex;
+          gap: 0.8rem;
+          width: 100%;
+          margin-top: 1rem;
+        }
+
+        .candidate-actions .interview-score {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.5rem;
+          text-align: center;
+        }
+
+        .candidate-actions button {
+          width: 100%;
+        }
+
+        .candidate-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
 
         .candidate-info {
-          flex: 1;
+          width: 100%;
+          margin-bottom: 1rem;
         }
 
         .candidate-info h3 {
-          font-size: 1rem;
+          font-size: 1.2rem;
           font-weight: 600;
-          color: #1a202c;
-          margin-bottom: 0.5rem;
+          color: #34495e;
+          margin-bottom: 0.6rem;
         }
 
         .candidate-meta {
           display: flex;
-          gap: 1rem;
-          font-size: 0.875rem;
-          color: #4a5568;
-          margin-bottom: 0.5rem;
+          flex-wrap: wrap;
+          gap: 1.2rem;
+          font-size: 0.9rem;
+          color: #555;
+          margin-bottom: 0.75rem;
         }
 
         .candidate-status {
-          margin-left: 1rem;
+          // align-self: flex-end;
+          margin-top: -0.5rem;
+          margin-right: -0.5rem;
         }
 
-        .btn-primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+        .candidate-action-button {
+          background: linear-gradient(45deg, #6c757d, #5a6268);
           color: white;
           border: none;
-          padding: 0.75rem 1.5rem;
+          padding: 0.6rem 1.2rem;
           border-radius: 8px;
+          font-size: 0.9rem;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s ease-in-out;
+          box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
         }
 
-        .btn-primary:hover {
+        .candidate-action-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
         }
 
-        .btn-destructive {
-          background: linear-gradient(135deg, #ef4444, #dc2626);
+        .candidate-action-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .send-outreach-button {
+          background: linear-gradient(45deg, #28a745, #218838);
           color: white;
           border: none;
-          padding: 0.75rem 1.5rem;
+          padding: 0.6rem 1.2rem;
           border-radius: 8px;
+          font-size: 0.9rem;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s ease-in-out;
+          box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
         }
 
-        .btn-destructive:hover {
+        .send-outreach-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+          box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
         }
 
-        .btn-destructive:disabled {
-          opacity: 0.7;
+        .send-outreach-button:disabled {
+          opacity: 0.6;
           cursor: not-allowed;
           transform: none;
           box-shadow: none;
         }
 
          .btn-danger {
-          background: #e53e3e;
+          background: linear-gradient(45deg, #dc3545, #c82333);
           color: white;
           border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          font-size: 0.875rem;
+          padding: 0.6rem 1.2rem;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s ease-in-out;
+          box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .btn-danger:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-danger:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
       `}</style>
     </div>

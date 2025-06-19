@@ -71,8 +71,8 @@ export async function callGroq(
 
     return validatedData.choices[0]?.message?.content || "";
   } catch (error) {
-    // console.error("Error calling Groq API:", error);
-    throw error;
+    console.error("Error calling Groq API:", error);
+    throw new Error(`Failed to call Groq API: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -127,7 +127,7 @@ If a field is not mentioned or unclear, omit it from the response.
     const filters = JSON.parse(content) as SearchFilters;
     return filters;
   } catch (error) {
-    // console.error("Error parsing query with Groq:", error);
+    console.error("Error parsing query with Groq:", error);
     // Fallback to basic keyword extraction
     return extractBasicFilters(query);
   }
@@ -180,11 +180,11 @@ Respond in this exact JSON format:
 
     return JSON.parse(content);
   } catch (error) {
-    // console.error("Error generating match score:", error);
+    console.error("Error generating match score:", error);
     return {
       score: 50,
       reasoning:
-        "Unable to generate detailed analysis. Basic compatibility assessment needed.",
+        `Unable to generate detailed analysis. Error: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }

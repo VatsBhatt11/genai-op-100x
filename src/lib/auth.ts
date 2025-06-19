@@ -15,6 +15,7 @@ declare module "next-auth" {
       id: string;
       role: string;
       email: string;
+      candidateProfileId?: string;
     };
   }
 }
@@ -100,11 +101,23 @@ export const authOptions = {
       if (token?.role) {
         session.user.role = token.role as string;
       }
+      if (token?.candidateProfileId) {
+        session.user.candidateProfileId = token.candidateProfileId as string;
+      }
       return session;
     },
     async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.role = user.role;
+        if (user.role === "CANDIDATE") {
+          const candidateProfile = await prisma.candidateProfile.findUnique({
+            where: { userId: user.id },
+            select: { id: true },
+          });
+          if (candidateProfile) {
+            token.candidateProfileId = candidateProfile.id;
+          }
+        }
       }
       return token;
     },

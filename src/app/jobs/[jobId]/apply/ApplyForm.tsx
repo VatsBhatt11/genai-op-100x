@@ -35,7 +35,7 @@ export default function ApplyForm({ job, outreach, companyName }: ApplyFormProps
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/applications", {
+      const response = await fetch(`/api/jobs/${job.id}/apply`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,7 +55,7 @@ export default function ApplyForm({ job, outreach, companyName }: ApplyFormProps
       }
 
       toast.success("Application submitted successfully!");
-      router.push("/jobs");
+      router.push(`/jobs/${job.id}/interview`);
     } catch (error) {
       // console.error("Error submitting application:", error);
       toast.error("Failed to submit application. Please try again.");
@@ -111,4 +111,4 @@ export default function ApplyForm({ job, outreach, companyName }: ApplyFormProps
       </Card>
     </div>
   );
-} 
+}

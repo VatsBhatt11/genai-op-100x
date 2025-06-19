@@ -2,6 +2,20 @@
 
 import Link from "next/link";
 
+interface InterviewReport {
+  score: number;
+  summary: string;
+  strengths: string[];
+  areasForImprovement: string[];
+}
+
+interface Application {
+  id: string;
+  status: string;
+  interviewReport: InterviewReport | null;
+  candidateId: string;
+}
+
 interface Job {
   id: string;
   title: string;
@@ -12,12 +26,13 @@ interface Job {
     name: string;
     logo: string;
   };
-  outreach: Array<{
+  preScreening: {
     id: string;
-    preScreening: {
-      id: string;
-    } | null;
-  }>;
+  } | null;
+  hasApplied: boolean;
+  hasOutreach: boolean;
+  application: Application | null;
+  hasInterviewReport: boolean;
 }
 
 interface JobsListProps {
@@ -25,6 +40,7 @@ interface JobsListProps {
 }
 
 export default function JobsList({ jobs }: JobsListProps) {
+  console.log(jobs)
   return (
     <div className="jobs-container">
       <div className="jobs-header">
@@ -34,8 +50,15 @@ export default function JobsList({ jobs }: JobsListProps) {
 
       <div className="jobs-grid">
         {jobs.map((job) => {
-          const outreach = job.outreach[0];
-          const status = outreach.preScreening ? "In Review" : "Not Applied";
+          let status = "Not Applied";
+          if (job.hasApplied) {
+            status = "Applied";
+          } else if (job.hasOutreach) {
+            status = "Outreached";
+          }
+          if (job.preScreening) {
+            status = "In Review";
+          }
           
           return (
             <div key={job.id} className="job-card">
@@ -62,16 +85,24 @@ export default function JobsList({ jobs }: JobsListProps) {
                 </span>
               </div>
 
-              {!outreach.preScreening && (
+              {job.hasApplied && job.application?.status === "INTERVIEW_COMPLETED" ? (
                 <Link 
-                  href={`/jobs/${job.id}/apply`}
+                  href={`/jobs/${job.id}/interview`}
+                  className="btn btn-secondary"
+                >
+                  View Interview Report
+                </Link>
+              ) 
+               : (
+                <Link 
+                  href={`/jobs/${job.id}/interview`}
                   className="btn btn-primary"
                 >
-                  Apply Now
+                  Apply now
                 </Link>
               )}
             </div>
-          );
+          )
         })}
       </div>
 
@@ -307,4 +338,4 @@ export default function JobsList({ jobs }: JobsListProps) {
       `}</style>
     </div>
   );
-} 
+}

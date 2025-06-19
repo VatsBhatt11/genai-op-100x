@@ -2,8 +2,10 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: #333;
 }
 
 .searchForm {
@@ -18,15 +20,13 @@
   flex: 1;
   background: white;
   border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .searchInputWrapper:focus-within {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
 }
 
 .searchIcon {
@@ -34,29 +34,29 @@
   left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: #999;
   width: 1.25rem;
   height: 1.25rem;
-  transition: color 0.3s ease;
+  transition: color 0.4s ease;
 }
 
 .searchInputWrapper:focus-within .searchIcon {
-  color: #3b82f6;
+  color: #007bff;
 }
 
 .searchInput {
   width: 100%;
   padding: 1rem 3rem;
-  border: 2px solid transparent;
+  border: 2px solid #eee;
   border-radius: 1rem;
   font-size: 1rem;
-  background: transparent;
-  transition: all 0.3s ease;
+  background: #fdfdfd;
+  transition: all 0.4s ease;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #007bff;
 }
 
 .clearButton {
@@ -66,43 +66,44 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #64748b;
+  color: #aaa;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .clearButton:hover {
-  background: #f1f5f9;
-  color: #475569;
+  background: #eee;
+  color: #777;
 }
 
 .searchButton {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(45deg, #007bff, #0056b3);
   color: white;
   border: none;
   border-radius: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
 }
 
 .searchButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 12px -1px rgba(37, 99, 235, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 123, 255, 0.4);
 }
 
 .searchButton:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  background: linear-gradient(45deg, #a0caff, #80bfff);
 }
 
 .resultsContainer {
@@ -116,10 +117,13 @@
   background: white;
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
+  border: 1px solid #eee;
+  transform: translateY(0);
+  animation: fadeInScale 0.6s ease-out forwards;
 }
 
 .candidateCard::before {
@@ -129,10 +133,10 @@
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, #007bff, #0056b3);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .candidateCard:hover::before {
@@ -144,21 +148,22 @@
 }
 
 .candidateName {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #222;
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .candidateTitle {
   display: block;
-  color: #64748b;
-  font-size: 0.875rem;
+  color: #666;
+  font-size: 0.9rem;
   margin-top: 0.25rem;
 }
 
 .candidateLocation {
-  color: #64748b;
+  color: #666;
   font-size: 0.875rem;
   margin-bottom: 1rem;
   display: flex;
@@ -167,9 +172,9 @@
 }
 
 .candidateBio {
-  color: #475569;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.6;
   margin-bottom: 1.5rem;
 }
 
@@ -181,39 +186,192 @@
 }
 
 .skillTag {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
+  background: #e9ecef;
+  color: #555;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  border: 1px solid #dee2e6;
 }
 
 .skillTag:hover {
-  background: #e2e8f0;
-  transform: translateY(-1px);
+  background: #dae0e5;
+  transform: translateY(-2px);
 }
 
 .outreachButton {
   width: 100%;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(45deg, #007bff, #0056b3);
   color: white;
   border: none;
   border-radius: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
 }
 
 .outreachButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 123, 255, 0.4);
+}
+
+
+.outreachContainer {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  animation: slideInFromTop 0.5s ease-out forwards;
+  border: 1px solid #eee;
+}
+
+.outreachCard {
+  /* This div replaces the Card component */
+}
+
+.outreachHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.outreachHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.outreachMessage {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.outreachMessage:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.outreachActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.prescreeningContainer {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-top: 1.5rem;
+  animation: slideInFromBottom 0.5s ease-out forwards;
+  border: 1px solid #eee;
+}
+
+.prescreeningCard {
+  /* This div replaces the Card component */
+}
+
+.prescreeningContainer h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+.questionItem {
+  margin-bottom: 1rem;
+}
+
+.questionItem p {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.questionItem textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.questionItem textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.prescreeningActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.profileCardWrapper {
+  /* This div replaces the motion.div wrapper */
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
@@ -229,7 +387,7 @@
     width: 100%;
   }
 
-  .resultsContainer {
+  .resultsGrid {
     grid-template-columns: 1fr;
   }
 }

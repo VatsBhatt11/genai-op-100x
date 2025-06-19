@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Search, Send, MessageSquare, Plus, Check, Phone, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { CandidateProfileCard } from './CandidateProfileCard';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Card } from './ui/card';
+
 import { useToast } from './ui/use-toast';
-import { Badge } from './ui/badge';
+
 import styles from "@/app/company/dashboard/CompanySearch.module.css";
 
 interface SearchResult {
@@ -35,9 +35,10 @@ export function CompanySearch() {
   const [loading, setLoading] = useState(false);
   const [selectedProfiles, setSelectedProfiles] = useState<Set<string>>(new Set());
   const [showOutreach, setShowOutreach] = useState(false);
-  const [outreachMessage, setOutreachMessage] = useState('');
   const [showPreScreening, setShowPreScreening] = useState(false);
   const [preScreeningQuestions, setPreScreeningQuestions] = useState<string[]>([]);
+  const [outreachMessage, setOutreachMessage] = useState('');
+  const [outreachSubject, setOutreachSubject] = useState('');
   const [sendingOutreach, setSendingOutreach] = useState(false);
   const { toast } = useToast();
 
@@ -77,43 +78,7 @@ export function CompanySearch() {
     setSelectedProfiles(newSelection);
   };
 
-  const handleSendOutreach = async () => {
-    if (selectedProfiles.size === 0) return;
 
-    setSendingOutreach(true);
-    try {
-      const response = await fetch('/api/outreach/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateIds: Array.from(selectedProfiles),
-          message: outreachMessage,
-          query: query || "Looking for candidates",
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast({
-          title: "Success",
-          description: `Outreach messages sent successfully to ${data.sentCount} candidates`,
-        });
-        setSelectedProfiles(new Set());
-        setOutreachMessage('');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send outreach');
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send outreach messages",
-        variant: "destructive",
-      });
-    } finally {
-      setSendingOutreach(false);
-    }
-  };
 
   const addPreScreeningQuestion = () => {
     setPreScreeningQuestions([...preScreeningQuestions, '']);
@@ -123,6 +88,103 @@ export function CompanySearch() {
     const newQuestions = [...preScreeningQuestions];
     newQuestions[index] = value;
     setPreScreeningQuestions(newQuestions);
+  };
+
+  const getSelectedProfilesWithPhone = () => {
+    return results.filter(r => selectedProfiles.has(r.profile.id))
+      .map(r => ({
+        id: r.profile.id,
+        fullName: r.profile.fullName,
+        email: r.profile.user.email,
+        phoneNumber: r.profile.phoneNumber,
+      }));
+  };
+
+  const handleSendOutreach = async () => {
+    setSendingOutreach(true);
+    try {
+      if (outreachMessage.trim() === '' || outreachSubject.trim() === '') {
+        toast({
+          title: "Missing Information",
+          description: "Please provide both a subject and a message for the outreach.",
+          variant: "destructive",
+        });
+        setSendingOutreach(false);
+        return;
+      }
+
+      const selectedCandidates = results.filter(r => selectedProfiles.has(r.profile.id));
+
+      if (selectedCandidates.length === 0) {
+        toast({
+          title: "No candidates selected",
+          description: "Please select at least one candidate to send outreach.",
+          variant: "destructive",
+        });
+        setSendingOutreach(false);
+        return;
+      }
+
+      let successfulSends = 0;
+      for (const candidate of selectedCandidates) {
+        try {
+          const response = await fetch('/api/outreach/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              candidateId: candidate.profile.id,
+              subject: outreachSubject,
+              message: outreachMessage,
+              query: query,
+            }),
+          });
+
+          if (response.ok) {
+            successfulSends++;
+          } else {
+            const errorData = await response.json();
+            console.error(`Failed to send outreach to ${candidate.profile.fullName}:`, errorData);
+            toast({
+              title: `Error sending to ${candidate.profile.fullName}`,
+              description: errorData.error || "An unknown error occurred.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to send outreach to ${candidate.profile.fullName}:`, error);
+          toast({
+            title: `Error sending to ${candidate.profile.fullName}`,
+            description: "An unexpected error occurred.",
+            variant: "destructive",
+          });
+        }
+      }
+
+      if (successfulSends > 0) {
+        toast({
+          title: "Outreach Sent",
+          description: `Outreach sent to ${successfulSends} of ${selectedCandidates.length} candidates.`, 
+        });
+        setOutreachMessage('');
+        setOutreachSubject('');
+        setSelectedProfiles(new Set());
+      } else {
+        toast({
+          title: "Outreach Failed",
+          description: "No outreach messages were sent successfully.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to send outreach:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send outreach.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingOutreach(false);
+    }
   };
 
   const savePreScreeningQuestions = async () => {
@@ -149,150 +211,87 @@ export function CompanySearch() {
     }
   };
 
-  const getSelectedProfilesWithPhone = () => {
-    return results.filter(result => 
-      selectedProfiles.has(result.profile.id) && result.profile.phoneNumber
-    );
-  };
+
 
   return (
     <div className={styles.searchContainer}>
       <form onSubmit={handleSearch} className={styles.searchForm}>
-        <motion.div 
-          className={styles.searchInputWrapper}
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className={styles.searchInputWrapper}>
           <Search className={styles.searchIcon} />
           <input
             type="text"
+            id="search-query"
+            name="searchQuery"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search candidates by skills, location, or title..."
             className={styles.searchInput}
           />
           {query && (
-            <motion.button
+            <button
               type="button"
               onClick={(e) => {
                 e.preventDefault();
                 setQuery('');
               }}
               className={styles.clearButton}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
             >
               <X size={16} />
-            </motion.button>
+            </button>
           )}
-        </motion.div>
-        <motion.button
+        </div>
+        <button
           type="submit"
           className={styles.searchButton}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
           disabled={loading}
         >
           {loading ? "Searching..." : "Search"}
-        </motion.button>
+        </button>
       </form>
 
-      <AnimatePresence>
-        {showOutreach && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className={styles.outreachContainer}
-          >
-            <Card className={styles.outreachCard}>
+      {showOutreach && (
+          <div className={styles.outreachContainer}>
+            <div className={styles.outreachCard}>
               <div className={styles.outreachHeader}>
                 <h3>Outreach Message</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowPreScreening(!showPreScreening)}
-                  className={styles.prescreeningToggle}
-                >
-                  {showPreScreening ? 'Hide Pre-screening' : 'Show Pre-screening'}
-                </Button>
               </div>
-              <Textarea
-                placeholder="Write your outreach message..."
+              <input
+                type="text"
+                id="outreach-subject"
+                name="outreachSubject"
+                value={outreachSubject}
+                onChange={(e) => setOutreachSubject(e.target.value)}
+                placeholder="Subject of the outreach message"
+                className={styles.outreachInput}
+              />
+              <textarea
+                id="outreach-message"
+                name="outreachMessage"
                 value={outreachMessage}
                 onChange={(e) => setOutreachMessage(e.target.value)}
+                placeholder="Write your outreach message here..."
                 className={styles.outreachTextarea}
               />
-              <div className={styles.outreachFooter}>
-                <div className={styles.whatsappStatus}>
-                  <Phone className={styles.whatsappIcon} />
-                  <span>
-                    {getSelectedProfilesWithPhone().length} of {selectedProfiles.size} selected candidates have WhatsApp enabled
-                  </span>
-                </div>
-                <Button
-                  onClick={handleSendOutreach}
-                  disabled={selectedProfiles.size === 0 || !outreachMessage.trim() || sendingOutreach}
-                  className={styles.sendButton}
-                >
-                  <Send className={styles.sendIcon} />
-                  {sendingOutreach ? 'Sending...' : `Send to ${selectedProfiles.size} candidates`}
-                </Button>
-              </div>
-            </Card>
-
-            {showPreScreening && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={styles.prescreeningContainer}
+              <button 
+                disabled={selectedProfiles.size === 0 || sendingOutreach || outreachMessage.trim() === '' || outreachSubject.trim() === ''}
+                onClick={handleSendOutreach}
+                className={styles.outreachButton}
               >
-                <Card className={styles.prescreeningCard}>
-                  <h3>Pre-screening Questions</h3>
-                  {preScreeningQuestions.map((question, index) => (
-                    <div key={index} className={styles.questionInputWrapper}>
-                      <Input
-                        value={question}
-                        onChange={(e) => updatePreScreeningQuestion(index, e.target.value)}
-                        placeholder={`Question ${index + 1}`}
-                        className={styles.questionInput}
-                      />
-                    </div>
-                  ))}
-                  <div className={styles.prescreeningActions}>
-                    <Button 
-                      variant="outline" 
-                      onClick={addPreScreeningQuestion}
-                      className={styles.addQuestionButton}
-                    >
-                      <Plus className={styles.addIcon} />
-                      Add Question
-                    </Button>
-                    <Button 
-                      onClick={savePreScreeningQuestions}
-                      className={styles.saveQuestionsButton}
-                    >
-                      Save Questions
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </motion.div>
+                {sendingOutreach ? 'Sending...' : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Outreach to {selectedProfiles.size} Candidates
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
       <div className={styles.resultsGrid}>
-        <AnimatePresence>
           {results.map((result, index) => (
-            <motion.div
+            <div
               key={`${result.profile.id}-${index}`}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
               className={styles.profileCardWrapper}
             >
               <CandidateProfileCard 
@@ -301,10 +300,9 @@ export function CompanySearch() {
                 onSelect={toggleProfileSelection}
                 isSelected={selectedProfiles.has(result.profile.id)}
               />
-            </motion.div>
+            </div>
           ))}
-        </AnimatePresence>
       </div>
     </div>
   );
-} 
+}

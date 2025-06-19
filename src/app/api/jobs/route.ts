@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const jobs = await searchJobs(search, session.user.id);
     return NextResponse.json(jobs);
   } catch (error) {
-    // console.error("Get jobs error:", error)
+    console.error("Get jobs error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(job, { status: 201 });
   } catch (error) {
-    // console.error("Create job error:", error)
+    console.error("Create job error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
