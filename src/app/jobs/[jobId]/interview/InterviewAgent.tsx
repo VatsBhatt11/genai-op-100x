@@ -92,7 +92,10 @@ console.log('job: ', job);
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ jobDescription, candidateId, interviewTranscript: transcript.map(t => ({ role: t.role, text: t.text })), applicationId: propApplicationId }),
+        body: JSON.stringify({
+          interviewTranscript: transcript.map(t => t.text).join('\n') || "", // Ensure transcript is not null or undefined
+          jobDescription: jobDescription || "", // Ensure job description is not null or undefined
+        }),
       });
 
       if (!response.ok) {
@@ -168,7 +171,7 @@ console.log('job: ', job);
       if (vapiRef.current) {
         vapiRef.current.start({
           name: "AI Recruiter",
-          firstMessage: `Hi ${session?.user?.name}, how are you? Ready for your ${job.company.name} ${job.position} interview? `,
+          firstMessage: `Hi, how are you? Ready for your interview? `,
           transcriber: {
             provider: 'deepgram',
             model: 'nova-2',
@@ -198,7 +201,7 @@ console.log('job: ', job);
               messages: [
                 {
                   role: "system",
-                  content: `You are an AI recruiter. Your name is ${job.company.name} AI Recruiter. You are interviewing a candidate for the ${job.position} position. Your goal is to assess the candidate's suitability for the role based on their answers to the pre-screening questions and their overall communication skills. Be polite, professional, and encouraging. Do not reveal the questions beforehand. Ask one question at a time and wait for the candidate's response. The interview should cover the following pre-screening questions: ${preScreeningQuestions.map((q) => q.question).join("\n")}`,
+                  content: `You are an AI recruiter. Your name is ${job.company.name} AI Recruiter. You are interviewing a candidate for the ${job.position} position. Your goal is to assess the candidate's suitability for the role based on their answers to the pre-screening questions and their overall communication skills. Be polite, professional, and encouraging. Do not reveal the questions beforehand. Ask one question at a time and wait for the candidate's response. Don't keep your response and questions long. Don't say the word 'undefined' if you encounter any. The interview should cover the following pre-screening questions: ${preScreeningQuestions.map((q) => q.question).join("\n")}`,
                 },
               ],
               tools: [{ type: "endCall" }],

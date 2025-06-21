@@ -35,12 +35,14 @@ export async function POST(request: Request) {
       Interview Transcript:
       ${interviewTranscript}
 
+      Regardless of the transcript's readability, you MUST always generate a report. If the interview transcript is empty or unreadable, provide a default score of 50 and a generic summary, strengths, and areas for improvement, explicitly stating that the report is based on limited information.
+
       Respond in this exact JSON format : (for example this is a sample response):
       {
-        "score": {{score_value}} // Calculate the score based on the candidate's performance and strengths observed during the interview and ensure it is number.
-        "summary": {{summary_value}} // Generate a summary based on the candidate's performance. Ensure this is never empty and it is string.
-        "strengths": {{strengths_value}} // List candidate's strengths. If no specific strengths are identified, provide a general statement like "No specific strengths identified based on the provided transcript." inside the list, ensure it is never empty and is list.
-        "areasForImprovement": {{areasForImprovement_value}} // List areas for improvement. If no specific areas for improvement are identified, provide a general statement like "No specific areas for improvement identified based on the provided transcript." and ensure it is never empty and is list.
+        "score": {{score_value}} // Calculate the score based on the candidate's performance and strengths observed during the interview and ensure it is number. If the transcript is empty or unreadable, default to 50.
+        "summary": {{summary_value}} // Generate a summary based on the candidate's performance. Ensure this is never empty and it is string. If the transcript is empty or unreadable, provide a generic summary like "A report has been generated based on the available information, though the interview could not be fully assessed due to an unreadable or empty transcript."
+        "strengths": {{strengths_value}} // List candidate's strengths. If no specific strengths are identified, provide a general statement like "No specific strengths identified based on the provided transcript." inside the list, ensure it is never empty and is list. If the transcript is empty or unreadable, provide a generic strength like "Ability to connect to the interview platform."
+        "areasForImprovement": {{areasForImprovement_value}} // List areas for improvement. If no specific areas for improvement are identified, provide a general statement like "No specific areas for improvement identified based on the provided transcript." and ensure it is never empty and is list. If the transcript is empty or unreadable, provide a generic area for improvement like "Further assessment needed due to incomplete interview data."
       }
 
       (for example this is a sample response):
