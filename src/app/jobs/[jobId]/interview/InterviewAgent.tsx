@@ -92,10 +92,11 @@ console.log('job: ', job);
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          interviewTranscript: transcript.map(t => t.text).join('\n') || "", // Ensure transcript is not null or undefined
-          jobDescription: jobDescription || "", // Ensure job description is not null or undefined
-        }),
+        // body: JSON.stringify({
+        //   interviewTranscript: transcript.map(t => t.text).join('\n') || "", // Ensure transcript is not null or undefined
+        //   jobDescription: jobDescription || "", // Ensure job description is not null or undefined
+        // }),
+        body: JSON.stringify({ jobDescription, candidateId, interviewTranscript: transcript.map(t => ({ role: t.role, text: t.text })), applicationId: propApplicationId }),
       });
 
       if (!response.ok) {
